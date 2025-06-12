@@ -1,12 +1,16 @@
-# FDP User Storage Federation
+# FDP User Storage Federation 🚀
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Keycloak 26.2.5](https://img.shields.io/badge/Keycloak-26.2.5-blue)](https://www.keycloak.org/)
 [![Java 21](https://img.shields.io/badge/Java-21-blue)](https://openjdk.org/)
+[![Version 0.0.1](https://img.shields.io/badge/version-0.0.1-orange)](pom.xml)
+[![Created January&nbsp;2025](https://img.shields.io/badge/created-Jan_2025-success)](https://github.com/)
 
 Sample Keycloak user storage federation provider that demonstrates how to expose
 users stored in an external MariaDB database. It targets Keycloak 26 and can be
 used as a starting point for your own integrations.
+
+👉 Découvrez aussi notre site [Minet.net](https://minet.net) !
 
 ## Features
 
@@ -53,6 +57,15 @@ sql/cas_schema.sql                     -- SQL schema for the external users
 
    If you need extra JVM options, edit the `JAVA_OPTS_APPEND` variable in
    `docker-compose.dev.yml`.
+
+## Pourquoi choisir Keycloak plutôt qu'Apereo CAS ? 💡
+
+- ✅ Interface d'administration moderne et conviviale
+- ✅ Large écosystème d'extensions et communauté active
+- ✅ Support natif d'OpenID Connect et SAML sans configuration complexe
+
+En bref, Keycloak offre une expérience plus intégrée et facile à prendre en
+main que *Apereo CAS*.
 
 ## License
 
