@@ -5,7 +5,7 @@
     <class>net.minet.keycloak.spi.entity.ExternalUser</class>
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
-      <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://federation-db:3306/keycloak_external"/>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://adh6-local-db:3306/adh6_prod"/>
       <property name="jakarta.persistence.jdbc.user" value="keycloak"/>
       <property name="jakarta.persistence.jdbc.password" value="password"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
