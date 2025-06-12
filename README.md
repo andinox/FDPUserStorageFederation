@@ -33,6 +33,15 @@ sql/cas_schema.sql                     -- SQL schema for the external users
    It bundles the MariaDB JDBC driver using the Maven Shade plugin,
    so you can copy it directly into Keycloak's `providers` directory.
 
+   **Note:** the JAR must exist before starting the containers. If it is
+   missing when you run `docker compose`, Docker will try to mount a
+   directory in its place and fail with an error similar to:
+
+   ```
+   Error response from daemon: failed to create task for container: ...
+   Are you trying to mount a directory onto a file (or vice-versa)?
+   ```
+
 2. **Start the development environment**
 
    ```bash

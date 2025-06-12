@@ -15,7 +15,7 @@ public class FdpSQLUserStorageProviderFactory implements
 
     public static final String PROVIDER_NAME = "fdp-sql";
 
-    @PersistenceUnit("federation")
+    @PersistenceUnit(unitName = "federation")
     private EntityManagerFactory emf;
 
     @Override
