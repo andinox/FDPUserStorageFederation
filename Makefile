@@ -1,4 +1,4 @@
-KEYCLOAK_VERSION ?= 22.0.5
+KEYCLOAK_VERSION ?= 26.2.5
 JAR_NAME = UserStorageFederation-0.0.1.jar
 
 build:
@@ -12,8 +12,8 @@ run-db:
 		-e MARIADB_DATABASE=keycloak_external \
 		-p 3306:3306 mariadb:latest
 
-run-cas-db:
-	docker run -d --name cas-mariadb \
+run-adh6-local-db:
+        docker run -d --name adh6-local-mariadb \
 		-e MARIADB_USER=casuser \
 		-e MARIADB_PASSWORD=caspass \
 		-e MARIADB_ROOT_PASSWORD=root \
@@ -28,8 +28,8 @@ run-keycloak: build
 		quay.io/keycloak/keycloak:$(KEYCLOAK_VERSION) start-dev
 
 clean:
-	docker rm -f federation-mariadb || true
-	docker rm -f cas-mariadb || true
+        docker rm -f federation-mariadb || true
+        docker rm -f adh6-local-mariadb || true
 	rm -rf target
 
-.PHONY: build run-db run-cas-db run-keycloak clean
+.PHONY: build run-db run-adh6-local-db run-keycloak clean

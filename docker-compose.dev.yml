@@ -11,19 +11,7 @@ services:
     volumes:
       - keycloak-db-data:/var/lib/mysql
 
-  federation-db:
-    image: mariadb:10.6
-    environment:
-      MARIADB_USER: keycloak
-      MARIADB_PASSWORD: password
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: keycloak_external
-    ports:
-      - "3306:3306"
-    volumes:
-      - federation-db-data:/var/lib/mysql
-
-  cas-db:
+  adh6-local-db:
     image: mariadb:10.6
     environment:
       MARIADB_USER: casuser
@@ -34,10 +22,10 @@ services:
       - "3307:3306"
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
-      - cas-db-data:/var/lib/mysql
+      - adh6-local-db-data:/var/lib/mysql
 
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.5
+    image: quay.io/keycloak/keycloak:26.2.5
     command: start-dev
     environment:
       KEYCLOAK_ADMIN: admin
@@ -53,10 +41,8 @@ services:
       - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation-0.0.1.jar
     depends_on:
       - keycloak-db
-      - federation-db
-      - cas-db
+      - adh6-local-db
 
 volumes:
   keycloak-db-data:
-  federation-db-data:
-  cas-db-data:
+  adh6-local-db-data:
