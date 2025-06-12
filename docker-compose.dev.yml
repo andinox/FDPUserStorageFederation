@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+  keycloak-db:
+    image: mariadb:10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - keycloak-db-data:/var/lib/mysql
+
+  federation-db:
+    image: mariadb:10.6
+    environment:
+      MARIADB_USER: keycloak
+      MARIADB_PASSWORD: password
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: keycloak_external
+    ports:
+      - "3306:3306"
+    volumes:
+      - federation-db-data:/var/lib/mysql
+
+  cas-db:
+    image: mariadb:10.6
+    environment:
+      MARIADB_USER: casuser
+      MARIADB_PASSWORD: caspass
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: adh6_prod
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+      - cas-db-data:/var/lib/mysql
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.5
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: mariadb
+      KC_DB_URL: jdbc:mariadb://keycloak-db:3306/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation-0.0.1.jar
+    depends_on:
+      - keycloak-db
+      - federation-db
+      - cas-db
+
+volumes:
+  keycloak-db-data:
+  federation-db-data:
+  cas-db-data:
