@@ -1,15 +1,19 @@
 # FDP User Storage Federation
 
-This repository contains a sample [Keycloak](https://www.keycloak.org/) user storage federation provider. It illustrates how to integrate an external SQL database with Keycloak 26 using JPA and MariaDB.
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Keycloak 26.2.5](https://img.shields.io/badge/Keycloak-26.2.5-blue)](https://www.keycloak.org/)
+[![Java 21](https://img.shields.io/badge/Java-21-blue)](https://openjdk.org/)
 
-The provider exposes the users stored in the `adherents` table and allows Keycloak to authenticate against that data source. It is mainly intended as a learning example or starting point for your own user federation implementation.
+Sample Keycloak user storage federation provider that demonstrates how to expose
+users stored in an external MariaDB database. It targets Keycloak 26 and can be
+used as a starting point for your own integrations.
 
 ## Features
 
-* Built with Java 21 and Keycloak 26.2.5
-* JPA persistence configured for MariaDB
-* Simple `ExternalUser` entity mapped to the `adherents` table
-* Docker Compose setup to run Keycloak and two MariaDB instances for development
+- Java 21 provider compatible with Keycloak 26.2.5
+- JPA configuration for MariaDB
+- `ExternalUser` entity mapped to the `adherents` table
+- Docker Compose environment with two MariaDB containers and Keycloak
 
 ## Directory layout
 
@@ -21,7 +25,7 @@ src/
 sql/cas_schema.sql                     -- SQL schema for the external users
 ```
 
-## Getting started
+## Quick start
 
 1. **Build the provider**
 
@@ -29,31 +33,27 @@ sql/cas_schema.sql                     -- SQL schema for the external users
    make build
    ```
 
-   The JAR is created under `target/UserStorageFederation-0.0.1.jar`.
-   It bundles the MariaDB JDBC driver using the Maven Shade plugin,
-   so you can copy it directly into Keycloak's `providers` directory.
+   The shaded JAR is created under `target/UserStorageFederation-0.0.1.jar` and
+   already includes the MariaDB driver. Copy it to Keycloak's `providers`
+   directory.
 
-2. **Start the development environment**
+2. **Launch the demo environment**
 
    ```bash
    docker compose -f docker-compose.dev.yml up
    ```
 
-   This command launches:
-   - a MariaDB container for Keycloak (`keycloak-db`)
-   - a MariaDB container seeded with `sql/cas_schema.sql` (`adh6-local-db`)
-   - a Keycloak 26 instance with the federation provider mounted
+   This spins up:
+   - `keycloak-db`: MariaDB database used by Keycloak
+   - `adh6-local-db`: MariaDB database seeded with `sql/cas_schema.sql`
+   - `keycloak`: Keycloak 26 with the federation provider mounted
 
-   Keycloak will be accessible at [http://localhost:8080](http://localhost:8080) with the admin credentials `admin`/`admin`.
+   Access Keycloak at [http://localhost:8080](http://localhost:8080) with
+   `admin` / `admin`.
 
-   The provider connects to the `adh6-local-db` container using the JPA configuration found in `src/main/resources/META-INF/persistence.xml`.
-
-   To pass additional JVM options to Keycloak, append them to the `JAVA_OPTS_APPEND` variable in `docker-compose.dev.yml`. Example:
-
-   ```yaml
-   JAVA_OPTS_APPEND: "-Dnet.bytebuddy.experimental=true -Dmy.custom.property=value"
-   ```
+   If you need extra JVM options, edit the `JAVA_OPTS_APPEND` variable in
+   `docker-compose.dev.yml`.
 
 ## License
 
-Released under the MIT License. See [LICENSE](LICENSE) for details.
+Released under the [MIT](LICENSE) license.
