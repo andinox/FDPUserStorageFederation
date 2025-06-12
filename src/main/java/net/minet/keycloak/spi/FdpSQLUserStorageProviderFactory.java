@@ -7,6 +7,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.storage.UserStorageProviderFactory;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceUnit;
 
 
 public class FdpSQLUserStorageProviderFactory implements
@@ -14,6 +15,7 @@ public class FdpSQLUserStorageProviderFactory implements
 
     public static final String PROVIDER_NAME = "fdp-sql";
 
+    @PersistenceUnit("federation")
     private EntityManagerFactory emf;
 
     @Override

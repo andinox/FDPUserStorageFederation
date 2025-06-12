@@ -17,6 +17,7 @@ import org.keycloak.storage.user.UserRegistrationProvider;
 import java.util.Map;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 import net.minet.keycloak.spi.entity.ExternalUser;
 import java.util.stream.Stream;
 import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
@@ -30,6 +31,7 @@ public class FdpSQLUserStorageProvider implements
         UserQueryProvider {
 
     protected KeycloakSession session;
+    @PersistenceContext(unitName = "federation")
     protected EntityManager em;
     protected ComponentModel model;
 
