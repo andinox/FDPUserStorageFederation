@@ -30,8 +30,8 @@ sql/cas_schema.sql                     -- SQL schema for the external users
    ```
 
    The JAR is created under `target/UserStorageFederation-0.0.1.jar`.
-   It already bundles the MariaDB JDBC driver, so you can copy it directly into
-   Keycloak's `providers` directory.
+   It bundles the MariaDB JDBC driver using the Maven Shade plugin,
+   so you can copy it directly into Keycloak's `providers` directory.
 
 2. **Start the development environment**
 
