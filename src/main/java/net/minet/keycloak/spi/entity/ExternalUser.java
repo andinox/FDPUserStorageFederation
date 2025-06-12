@@ -3,25 +3,25 @@ package net.minet.keycloak.spi.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "external_user")
+@Table(name = "adherents")
 public class ExternalUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "login", unique = true, nullable = false)
     private String username;
 
     @Column
     private String password;
 
-    @Column
+    @Column(name = "mail")
     private String email;
 
-    @Column(name = "first_name")
+    @Column(name = "prenom")
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "nom")
     private String lastName;
 
     public Long getId() {
