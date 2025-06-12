@@ -46,6 +46,12 @@ sql/cas_schema.sql                     -- SQL schema for the external users
 
    The provider connects to the `adh6-local-db` container using the JPA configuration found in `src/main/resources/META-INF/persistence.xml`.
 
+   To pass additional JVM options to Keycloak, append them to the `JAVA_OPTS_APPEND` variable in `docker-compose.dev.yml`. Example:
+
+   ```yaml
+   JAVA_OPTS_APPEND: "-Dnet.bytebuddy.experimental=true -Dmy.custom.property=value"
+   ```
+
 ## License
 
 Released under the MIT License. See [LICENSE](LICENSE) for details.
