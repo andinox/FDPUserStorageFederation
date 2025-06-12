@@ -9,6 +9,7 @@
       <property name="jakarta.persistence.jdbc.user" value="keycloak"/>
       <property name="jakarta.persistence.jdbc.password" value="password"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect"/>
     </properties>
   </persistence-unit>
 </persistence>
