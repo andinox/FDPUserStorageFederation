@@ -13,7 +13,7 @@ run-db:
 		-p 3306:3306 mariadb:latest
 
 run-adh6-local-db:
-        docker run -d --name adh6-local-mariadb \
+	docker run -d --name adh6-local-mariadb \
 		-e MARIADB_USER=casuser \
 		-e MARIADB_PASSWORD=caspass \
 		-e MARIADB_ROOT_PASSWORD=root \
@@ -28,8 +28,8 @@ run-keycloak: build
 		quay.io/keycloak/keycloak:$(KEYCLOAK_VERSION) start-dev
 
 clean:
-        docker rm -f federation-mariadb || true
-        docker rm -f adh6-local-mariadb || true
+	docker rm -f federation-mariadb || true
+	docker rm -f adh6-local-mariadb || true
 	rm -rf target
 
 .PHONY: build run-db run-adh6-local-db run-keycloak clean
