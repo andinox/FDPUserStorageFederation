@@ -4,7 +4,7 @@ import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputUpdater;
 import org.keycloak.credential.CredentialInputValidator;
-import org.keycloak.models.credential.CredentialModel;
+import org.keycloak.credential.CredentialModel;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -178,7 +178,7 @@ public class FdpSQLUserStorageProvider implements
         ExternalUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, ExternalUser user) {
             super(session, realm, model);
             this.user = user;
-            setEntityId(String.valueOf(user.getId()));
+            this.storageId = new org.keycloak.storage.StorageId(model.getId(), String.valueOf(user.getId()));
         }
 
         @Override
