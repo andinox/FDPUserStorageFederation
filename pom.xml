@@ -75,6 +75,12 @@
                 <version>3.5.1</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <artifactSet>
+                        <includes>
+                            <include>org.mariadb.jdbc:mariadb-java-client</include>
+                        </includes>
+                    </artifactSet>
+                    <minimizeJar>true</minimizeJar>
                 </configuration>
                 <executions>
                     <execution>
