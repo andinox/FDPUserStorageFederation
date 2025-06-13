@@ -60,8 +60,21 @@ sql/cas_schema.sql                     -- SQL schema for the external users
    To pass additional JVM options to Keycloak, append them to the `JAVA_OPTS_APPEND` variable in `docker-compose.dev.yml`. Example:
 
    ```yaml
-   JAVA_OPTS_APPEND: "-Dnet.bytebuddy.experimental=true -Dmy.custom.property=value"
-   ```
+JAVA_OPTS_APPEND: "-Dnet.bytebuddy.experimental=true -Dmy.custom.property=value"
+```
+
+## Troubleshooting
+
+If Keycloak fails during the `build` phase with an error similar to:
+
+```
+ERROR: io.smallrye.config.ConfigSourceFactory: io.smallrye.config.PropertiesLocationConfigSourceFactory not a subtype
+```
+
+it usually means that the provider JAR contains its own copy of Quarkus libraries.
+To avoid classloading conflicts, ensure the Maven Shade plugin only bundles the
+MariaDB JDBC driver. The provided `pom.xml` already defines this configuration.
+Rebuild the project and copy the resulting JAR to Keycloak's `providers` directory.
 
 ## License
 
