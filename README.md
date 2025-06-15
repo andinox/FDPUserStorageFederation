@@ -76,6 +76,25 @@ To avoid classloading conflicts, ensure the Maven Shade plugin only bundles the
 MariaDB JDBC driver. The provided `pom.xml` already defines this configuration.
 Rebuild the project and copy the resulting JAR to Keycloak's `providers` directory.
 
+Another error you might encounter during the Keycloak build phase is:
+
+```
+ERROR: Multiple datasources are configured but more than 1 is using non-XA transactions
+```
+
+This happens when Keycloak detects several datasources but at least two of them
+are not using XA transactions. When using the sample `docker-compose.dev.yml`
+you can avoid this by enabling XA transactions globally:
+
+```yaml
+  keycloak:
+    environment:
+      KC_TRANSACTION_XA_ENABLED: "true"
+```
+
+Alternatively, ensure that all datasources except one have
+`quarkus.datasource.<name>.jdbc.transactions=xa` set.
+
 ## License
 
 Released under the MIT License. See [LICENSE](LICENSE) for details.
