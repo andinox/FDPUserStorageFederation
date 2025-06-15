@@ -81,7 +81,7 @@
                             <include>org.mariadb.jdbc:mariadb-java-client</include>
                         </includes>
                     </artifactSet>
-                    <minimizeJar>true</minimizeJar>
+                    <minimizeJar>false</minimizeJar>
                 </configuration>
                 <executions>
                     <execution>
