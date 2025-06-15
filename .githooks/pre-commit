@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# Pre-commit hook to bump project version
-"$(dirname "$0")/../scripts/bump_version.sh"
