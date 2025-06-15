@@ -21,6 +21,23 @@ src/
 sql/cas_schema.sql                     -- SQL schema for the external users
 ```
 
+## Version bumping
+
+Before each commit the script `scripts/bump_version.sh` automatically
+increments the patch version found in `pom.xml` and updates all references
+to the provider JAR in the repository. The Git hook lives in
+`.githooks/pre-commit`.
+
+Activate it once after cloning:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+On each merge to the `main` branch, the GitHub Actions workflow
+`.github/workflows/update-env.yml` runs the same bump script and commits
+an updated `.env` file containing the new version number.
+
 ## Getting started
 
 1. **Build the provider**
@@ -29,7 +46,7 @@ sql/cas_schema.sql                     -- SQL schema for the external users
    make build
    ```
 
-   The JAR is created under `target/UserStorageFederation-0.0.1.jar`.
+   The JAR is created under `target/UserStorageFederation-0.0.5.jar`.
    It bundles the MariaDB JDBC driver using the Maven Shade plugin,
    so you can copy it directly into Keycloak's `providers` directory.
 
