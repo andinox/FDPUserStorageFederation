@@ -38,7 +38,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation-0.0.1.jar
+      - ./target/UserStorageFederation-0.0.4.jar:/opt/keycloak/providers/UserStorageFederation-0.0.4.jar
     depends_on:
       - keycloak-db
       - adh6-local-db

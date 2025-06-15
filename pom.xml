@@ -6,7 +6,7 @@
 
     <groupId>net.minet</groupId>
     <artifactId>UserStorageFederation</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.4</version>
 
     <properties>
         <version.keycloak>26.2.5</version.keycloak>
