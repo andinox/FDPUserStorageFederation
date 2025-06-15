@@ -34,6 +34,12 @@ Activate it once after cloning:
 git config core.hooksPath .githooks
 ```
 
+
+On each merge to the `main` branch, the GitHub Actions workflow
+`.github/workflows/update-env.yml` runs the same bump script and commits
+an updated `.env` file containing the new version number.
+
+
 ## Getting started
 
 1. **Build the provider**
@@ -42,7 +48,8 @@ git config core.hooksPath .githooks
    make build
    ```
 
-   The JAR is created under `target/UserStorageFederation-0.0.4.jar`.
+   The JAR is created under `target/UserStorageFederation-0.0.5.jar`.
+
    It bundles the MariaDB JDBC driver using the Maven Shade plugin,
    so you can copy it directly into Keycloak's `providers` directory.
 
