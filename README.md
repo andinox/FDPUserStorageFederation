@@ -75,7 +75,7 @@ an updated `.env` file containing the new version number.
 
    Keycloak will be accessible at [http://localhost:8080](http://localhost:8080) with the admin credentials `admin`/`admin`.
 
-   The provider connects to the `adh6-local-db` container using the JPA configuration found in `src/main/resources/META-INF/persistence.xml`.
+   The provider connects to the `adh6-local-db` container using the JPA settings defined in `src/main/resources/application.properties`.
 
    To pass additional JVM options to Keycloak, append them to the `JAVA_OPTS_APPEND` variable in `docker-compose.dev.yml`. Example:
 
