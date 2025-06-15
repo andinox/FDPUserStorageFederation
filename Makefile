@@ -1,6 +1,7 @@
 KEYCLOAK_VERSION ?= 26.2.5
 JAR_NAME = UserStorageFederation-0.0.5.jar
 
+
 build:
 	mvn -DskipTests package
 

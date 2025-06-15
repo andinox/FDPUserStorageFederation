@@ -8,6 +8,7 @@
     <artifactId>UserStorageFederation</artifactId>
     <version>0.0.5</version>
 
+
     <properties>
         <version.keycloak>26.2.5</version.keycloak>
         <!-- Keycloak 26 runs on Java 21 so compile the provider for that -->

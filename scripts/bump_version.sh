@@ -40,6 +40,7 @@ fi
 sed -i "0,/<version>${current_version//\./\.}<\/version>/s//<version>$new_version<\/version>/" "$POM"
 sed -i "s/UserStorageFederation-${current_version//\./\.}.jar/UserStorageFederation-$new_version.jar/g" Makefile docker-compose.dev.yml README.md
 
+
 # Update .env
 ENV_FILE=".env"
 if [[ -f "$ENV_FILE" ]]; then
@@ -52,4 +53,3 @@ else
     echo "VERSION=$new_version" > "$ENV_FILE"
 fi
 
-echo "Bumped version: $current_version -> $new_version"
