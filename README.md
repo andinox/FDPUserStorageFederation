@@ -11,3 +11,15 @@ To build the federation you need Node.js. The recommended way to install it is w
 Build the provider with Maven and then start the provided `docker-compose.yml` stack.
 The Keycloak container mounts the built JAR and loads the configuration from `application.properties` so that the federation connects to the MariaDB database.
 External users stored in the `adherents` table can then authenticate through Keycloak.
+
+## Optimized Keycloak build
+
+`docker-compose.yml` now runs `kc.sh build` automatically using the `KC_DB`
+environment variable. If you start Keycloak manually, run the following command
+before `start` and replace the vendor as needed:
+
+```bash
+kc.sh build --db=mssql
+```
+
+After building, launch Keycloak with `kc.sh start-dev` or `kc.sh start`.

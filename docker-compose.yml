@@ -23,7 +23,8 @@ services:
       QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
       QUARKUS_HIBERNATE_ORM_FEDERATION_DATASOURCE: federation
       QUARKUS_HIBERNATE_ORM_FEDERATION_DIALECT: org.hibernate.dialect.MariaDBDialect
-    command: start-dev
+    entrypoint: ["sh", "-c"]
+    command: "kc.sh build --db=$KC_DB && exec kc.sh start-dev"
     depends_on:
       - postgres
       - mariadb
