@@ -16,10 +16,12 @@ External users stored in the `adherents` table can then authenticate through Key
 
 `docker-compose.yml` now runs `kc.sh build` automatically using the `KC_DB`
 environment variable. If you start Keycloak manually, run the following command
-before `start` and replace the vendor as needed:
+before `start` and replace the vendor as needed. The additional dependency flag
+downloads the MariaDB JDBC driver from Maven Central during the build:
 
 ```bash
-kc.sh build --db=mssql
+kc.sh build --db=mssql \
+  --spi-connections-jpa-quarkus-additional-dependencies=org.mariadb.jdbc:mariadb-java-client
 ```
 
 After building, launch Keycloak with `kc.sh start-dev` or `kc.sh start`.
