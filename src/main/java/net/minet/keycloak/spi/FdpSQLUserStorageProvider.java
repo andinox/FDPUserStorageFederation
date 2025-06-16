@@ -145,7 +145,6 @@ public class FdpSQLUserStorageProvider implements
         return true;
     }
 
-    @Override
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
         return em.createQuery("select u from ExternalUser u", ExternalUser.class)
                 .setFirstResult(first)
@@ -162,7 +161,7 @@ public class FdpSQLUserStorageProvider implements
     }
 
     @Override
-    public Stream<UserModel> searchForUserStream(RealmModel realm, String search, int first, int max) {
+    public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
         String pattern = "%" + search.toLowerCase() + "%";
         return em.createQuery("select u from ExternalUser u where lower(u.username) like :pattern", ExternalUser.class)
                 .setParameter("pattern", pattern)
