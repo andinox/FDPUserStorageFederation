@@ -12,14 +12,23 @@ Build the provider with Maven and then start the provided `docker-compose.yml` s
 The Keycloak container mounts the built JAR and loads the configuration from `application.properties` so that the federation connects to the MariaDB database.
 External users stored in the `adherents` table can then authenticate through Keycloak.
 
+When building Keycloak, ensure that the MariaDB JDBC driver is available. The
+included compose file passes the
+`--spi-connections-jpa-quarkus-additional-dependencies=org.mariadb.jdbc:mariadb-java-client`
+option to `kc.sh build` so the driver is automatically downloaded from Maven
+Central.
+
 ## Optimized Keycloak build
 
 `docker-compose.yml` now runs `kc.sh build` automatically using the `KC_DB`
 environment variable. If you start Keycloak manually, run the following command
-before `start` and replace the vendor as needed:
+before `start` and replace the vendor as needed. The additional CLI option tells
+Keycloak to download the MariaDB JDBC driver from Maven Central during the
+build:
 
 ```bash
-kc.sh build --db=mssql
+kc.sh build --db=mssql \
+  --spi-connections-jpa-quarkus-additional-dependencies=org.mariadb.jdbc:mariadb-java-client
 ```
 
 After building, launch Keycloak with `kc.sh start-dev` or `kc.sh start`.
