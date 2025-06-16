@@ -7,5 +7,6 @@ The `docker-compose.yml` file now also provisions a MariaDB service hosting a
 database named `adh6_prod`. The federation provider connects to this database to
 retrieve external users.
 
-Build the provider with Maven and copy the resulting JAR into Keycloak's `providers` directory.
-It exposes the external users to Keycloak and allows authentication against the `adherents` table.
+Build the provider with Maven and then start the provided `docker-compose.yml` stack.
+The Keycloak container mounts the built JAR and loads the configuration from `application.properties` so that the federation connects to the MariaDB database.
+External users stored in the `adherents` table can then authenticate through Keycloak.
