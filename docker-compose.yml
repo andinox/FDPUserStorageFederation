@@ -21,7 +21,19 @@ services:
     command: start-dev
     depends_on:
       - postgres
+      - mariadb
     ports:
       - "8080:8080"
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: adh6_prod
+      MARIADB_USER: keycloak
+      MARIADB_PASSWORD: password
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d:ro
 volumes:
   postgres_data:
+  mariadb_data:
