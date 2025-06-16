@@ -24,7 +24,10 @@ services:
       QUARKUS_HIBERNATE_ORM_FEDERATION_DATASOURCE: federation
       QUARKUS_HIBERNATE_ORM_FEDERATION_DIALECT: org.hibernate.dialect.MariaDBDialect
     entrypoint: ["sh", "-c"]
-    command: "kc.sh build --db=$KC_DB && exec kc.sh start-dev"
+    command: >
+      kc.sh build --db=$KC_DB
+        --spi-connections-jpa-quarkus-additional-dependencies=org.mariadb.jdbc:mariadb-java-client
+        && exec kc.sh start-dev
     depends_on:
       - postgres
       - mariadb
