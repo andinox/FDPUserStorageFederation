@@ -1,8 +1,7 @@
 package net.minet.keycloak.spi;
 
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
-import jakarta.persistence.PersistenceUnit;
+import org.mariadb.jdbc.MariaDbPoolDataSource;
+import javax.sql.DataSource;
 import org.keycloak.Config;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.models.KeycloakSession;
@@ -11,17 +10,27 @@ import org.keycloak.storage.UserStorageProviderFactory;
 public class FdpSQLUserStorageProviderFactory implements UserStorageProviderFactory<FdpSQLUserStorageProvider> {
     public static final String PROVIDER_NAME = "fdp-sql";
 
-    @PersistenceUnit(unitName = "federation")
-    private EntityManagerFactory emf;
+    private DataSource dataSource;
 
     @Override
     public void init(Config.Scope config) {
-        this.emf = Persistence.createEntityManagerFactory("federation");
+        try {
+            MariaDbPoolDataSource ds = new MariaDbPoolDataSource();
+            ds.setUrl(System.getProperty("quarkus.datasource.federation.jdbc.url",
+                    System.getenv("QUARKUS_DATASOURCE_FEDERATION_JDBC_URL")));
+            ds.setUser(System.getProperty("quarkus.datasource.federation.username",
+                    System.getenv("QUARKUS_DATASOURCE_FEDERATION_USERNAME")));
+            ds.setPassword(System.getProperty("quarkus.datasource.federation.password",
+                    System.getenv("QUARKUS_DATASOURCE_FEDERATION_PASSWORD")));
+            this.dataSource = ds;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize datasource", e);
+        }
     }
 
     @Override
     public FdpSQLUserStorageProvider create(KeycloakSession session, ComponentModel model) {
-        return new FdpSQLUserStorageProvider(session, model, emf.createEntityManager());
+        return new FdpSQLUserStorageProvider(session, model, dataSource);
     }
 
     @Override
@@ -31,8 +40,6 @@ public class FdpSQLUserStorageProviderFactory implements UserStorageProviderFact
 
     @Override
     public void close() {
-        if (emf != null) {
-            emf.close();
-        }
+        // nothing to close
     }
 }
