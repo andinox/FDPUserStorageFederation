@@ -21,13 +21,15 @@ Central.
 ## Optimized Keycloak build
 
 `docker-compose.yml` now runs `kc.sh build` automatically using the `KC_DB`
-environment variable. If you start Keycloak manually, run the following command
-before `start` and replace the vendor as needed. The additional CLI option tells
-Keycloak to download the MariaDB JDBC driver from Maven Central during the
-build:
+environment variable. Keycloak 26 requires XA transactions when more than one
+datasource is configured. The compose file enables them automatically, but if
+you start Keycloak manually, run the following command before `start` and
+replace the vendor as needed. The additional CLI options tell Keycloak to
+download the MariaDB JDBC driver from Maven Central and enable XA transactions
+for the default datasource during the build:
 
 ```bash
-kc.sh build --db=mssql \
+kc.sh build --db=mssql --transaction-xa-enabled=true \
   --spi-connections-jpa-quarkus-additional-dependencies=org.mariadb.jdbc:mariadb-java-client
 ```
 
