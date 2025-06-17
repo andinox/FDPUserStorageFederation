@@ -1,77 +1,31 @@
 package net.minet.keycloak.spi.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "adherents")
 public class ExternalUser {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "nom")
     private String lastName;
-
-    @Column(name = "prenom")
     private String firstName;
-
-    @Column(name = "mail")
     private String email;
-
-    @Column(name = "login", unique = true)
     private String username;
-
-    @Column(name = "password")
     private String password;
-
-    @Column(name = "date_de_depart")
     private LocalDate departureDate;
-
-    @Column(name = "commentaires")
     private String comments;
-
-    @Column(name = "mode_association")
     private Byte modeAssociation;
-
-    @Column(name = "access_token")
     private String accessToken;
-
-    @Column(name = "subnet")
     private String subnet;
-
-    @Column(name = "ip")
     private String ip;
-
-    @Column(name = "chambre_id")
     private Integer chambreId;
-
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column(name = "edminet")
     private Byte edminet;
-
-    @Column(name = "is_naina")
     private Byte isNaina;
-
-    @Column(name = "mailinglist")
     private Byte mailingList;
-
-    @Column(name = "mail_membership")
     private Integer mailMembership;
-
-    @Column(name = "ldap_login")
     private String ldapLogin;
-
-    @Column(name = "datesignedhosting")
     private LocalDateTime dateSignedHosting;
-
-    @Column(name = "datesignedadhesion")
     private LocalDateTime dateSignedAdhesion;
 
     public Integer getId() {

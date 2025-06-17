@@ -1,8 +1,7 @@
 package net.minet.keycloak.spi;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
+import javax.sql.DataSource;
+import java.sql.*;
 import net.minet.keycloak.spi.entity.ExternalUser;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
@@ -30,61 +29,84 @@ public class FdpSQLUserStorageProvider implements
         UserQueryProvider {
 
     protected KeycloakSession session;
-    @PersistenceContext(unitName = "federation")
-    protected EntityManager em;
+    protected DataSource dataSource;
     protected ComponentModel model;
 
-    public FdpSQLUserStorageProvider(KeycloakSession session, ComponentModel model, EntityManager em) {
+    public FdpSQLUserStorageProvider(KeycloakSession session, ComponentModel model, DataSource dataSource) {
         this.session = session;
         this.model = model;
-        this.em = em;
+        this.dataSource = dataSource;
     }
 
     protected UserModel createAdapter(RealmModel realm, ExternalUser user) {
         return new ExternalUserAdapter(session, realm, model, user);
     }
 
+    private ExternalUser mapUser(ResultSet rs) throws SQLException {
+        ExternalUser user = new ExternalUser();
+        user.setId(rs.getInt("id"));
+        user.setLastName(rs.getString("nom"));
+        user.setFirstName(rs.getString("prenom"));
+        user.setEmail(rs.getString("mail"));
+        user.setUsername(rs.getString("login"));
+        user.setPassword(rs.getString("password"));
+        return user;
+    }
+
     @Override
     public void close() {
-        if (em.isOpen()) {
-            em.close();
-        }
+        // nothing to close
     }
 
     @Override
     public UserModel getUserById(RealmModel realm, String id) {
-        ExternalUser user = null;
         try {
-            user = em.find(ExternalUser.class, Integer.parseInt(id));
-        } catch (NumberFormatException e) {
-            return null;
+            int userId = Integer.parseInt(id);
+            try (Connection c = dataSource.getConnection();
+                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE id = ?")) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return createAdapter(realm, mapUser(rs));
+                    }
+                }
+            }
+        } catch (NumberFormatException | SQLException e) {
+            // ignore
         }
-        if (user == null) return null;
-        return createAdapter(realm, user);
+        return null;
     }
 
     @Override
     public UserModel getUserByUsername(RealmModel realm, String username) {
-        try {
-            ExternalUser user = em.createQuery("select u from ExternalUser u where u.username = :username", ExternalUser.class)
-                    .setParameter("username", username)
-                    .getSingleResult();
-            return createAdapter(realm, user);
-        } catch (NoResultException ex) {
-            return null;
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE login = ?")) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return createAdapter(realm, mapUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            // ignore
         }
+        return null;
     }
 
     @Override
     public UserModel getUserByEmail(RealmModel realm, String email) {
-        try {
-            ExternalUser user = em.createQuery("select u from ExternalUser u where u.email = :email", ExternalUser.class)
-                    .setParameter("email", email)
-                    .getSingleResult();
-            return createAdapter(realm, user);
-        } catch (NoResultException ex) {
-            return null;
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE mail = ?")) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return createAdapter(realm, mapUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            // ignore
         }
+        return null;
     }
 
     @Override
@@ -95,12 +117,14 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public boolean updateCredential(RealmModel realm, UserModel user, CredentialInput input) {
         if (!supportsCredentialType(input.getType())) return false;
-        ExternalUser ext = em.find(ExternalUser.class, Integer.parseInt(user.getId()));
-        if (ext == null) return false;
-        em.getTransaction().begin();
-        ext.setPassword(input.getChallengeResponse());
-        em.getTransaction().commit();
-        return true;
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE adherents SET password = ? WHERE id = ?")) {
+            ps.setString(1, input.getChallengeResponse());
+            ps.setInt(2, Integer.parseInt(user.getId()));
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     @Override
@@ -121,61 +145,105 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public boolean isValid(RealmModel realm, UserModel user, CredentialInput input) {
         if (!supportsCredentialType(input.getType())) return false;
-        ExternalUser ext = em.find(ExternalUser.class, Integer.parseInt(user.getId()));
-        return ext != null && input.getChallengeResponse().equals(ext.getPassword());
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT password FROM adherents WHERE id = ?")) {
+            ps.setInt(1, Integer.parseInt(user.getId()));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return input.getChallengeResponse().equals(rs.getString(1));
+                }
+            }
+        } catch (SQLException e) {
+            // ignore
+        }
+        return false;
     }
 
     @Override
     public UserModel addUser(RealmModel realm, String username) {
-        ExternalUser user = new ExternalUser();
-        user.setUsername(username);
-        em.getTransaction().begin();
-        em.persist(user);
-        em.getTransaction().commit();
-        return createAdapter(realm, user);
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("INSERT INTO adherents (login) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, username);
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                ExternalUser user = new ExternalUser();
+                if (rs.next()) {
+                    user.setId(rs.getInt(1));
+                }
+                user.setUsername(username);
+                return createAdapter(realm, user);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public boolean removeUser(RealmModel realm, UserModel user) {
-        ExternalUser ext = em.find(ExternalUser.class, Integer.parseInt(user.getId()));
-        if (ext == null) return false;
-        em.getTransaction().begin();
-        em.remove(ext);
-        em.getTransaction().commit();
-        return true;
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("DELETE FROM adherents WHERE id = ?")) {
+            ps.setInt(1, Integer.parseInt(user.getId()));
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
-        return em.createQuery("select u from ExternalUser u", ExternalUser.class)
-                .setFirstResult(first)
-                .setMaxResults(max)
-                .getResultStream()
-                .map(u -> createAdapter(realm, u));
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents LIMIT ? OFFSET ?")) {
+            ps.setInt(1, max);
+            ps.setInt(2, first);
+            try (ResultSet rs = ps.executeQuery()) {
+                java.util.List<UserModel> list = new java.util.ArrayList<>();
+                while (rs.next()) {
+                    list.add(createAdapter(realm, mapUser(rs)));
+                }
+                return list.stream();
+            }
+        } catch (SQLException e) {
+            return Stream.empty();
+        }
     }
 
     @Override
     public int getUsersCount(RealmModel realm) {
-        Long count = em.createQuery("select count(u) from ExternalUser u", Long.class)
-                .getSingleResult();
-        return count.intValue();
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM adherents")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            // ignore
+        }
+        return 0;
     }
 
     @Override
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
         String pattern = "%" + search.toLowerCase() + "%";
-        return em.createQuery("select u from ExternalUser u where lower(u.username) like :pattern", ExternalUser.class)
-                .setParameter("pattern", pattern)
-                .setFirstResult(first)
-                .setMaxResults(max)
-                .getResultStream()
-                .map(u -> createAdapter(realm, u));
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
+            ps.setString(1, pattern);
+            ps.setInt(2, max);
+            ps.setInt(3, first);
+            try (ResultSet rs = ps.executeQuery()) {
+                java.util.List<UserModel> list = new java.util.ArrayList<>();
+                while (rs.next()) {
+                    list.add(createAdapter(realm, mapUser(rs)));
+                }
+                return list.stream();
+            }
+        } catch (SQLException e) {
+            return Stream.empty();
+        }
     }
 
     @Override
     public Stream<UserModel> searchForUserStream(RealmModel realm, Map<String, String> params, Integer first, Integer max) {
-        return em.createQuery("select u from ExternalUser u", ExternalUser.class)
-                .getResultStream()
-                .map(u -> createAdapter(realm, u));
+        return getUsersStream(realm, first == null ? 0 : first, max == null ? Integer.MAX_VALUE : max);
     }
 
     @Override
