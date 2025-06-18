@@ -4,7 +4,11 @@ This module provides a simple Keycloak 26.2.5 user storage provider backed by a 
 The table schema is included in [sql/cas_schema.sql](sql/cas_schema.sql).
 
 The `docker-compose.yml` file provisions Keycloak and a MariaDB instance
-hosting a database named `adh6_prod` that stores external users.
+hosting a database named `adh6_prod` that stores external users. Both the
+default datasource and the federation datasource use **XA** transactions.
+Keycloak's ephemeral development database already supports XA, and the
+federation datasource is created programmatically using
+`MariaDbXADataSource`.
 To build the federation you need Node.js. The recommended way to install it is
 with [nvm](https://github.com/nvm-sh/nvm).
 
@@ -26,3 +30,17 @@ for reference, but it is not required for normal operation.
 Simply run `docker compose up` after packaging the provider. Keycloak uses its
 ephemeral development database and connects to the external MariaDB instance for
 federated users.
+
+The relevant environment settings in `docker-compose.yml` look like this:
+
+```yaml
+  keycloak:
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      QUARKUS_DATASOURCE_JDBC_TRANSACTIONS: xa
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_URL: jdbc:mariadb://mariadb:3306/adh6_prod
+      QUARKUS_DATASOURCE_FEDERATION_USERNAME: keycloak
+      QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_TRANSACTIONS: xa
+```
