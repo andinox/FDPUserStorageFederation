@@ -2,6 +2,7 @@
 
 This module provides a simple Keycloak 26.2.5 user storage provider backed by a MariaDB table named `adherents`.
 The table schema is included in [sql/cas_schema.sql](sql/cas_schema.sql).
+Sample users are inserted automatically from [sql/cas_data.sql](sql/cas_data.sql).
 
 The `docker-compose.yml` file provisions Keycloak and a MariaDB instance
 hosting a database named `adh6_prod` that stores external users. Both the
