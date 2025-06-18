@@ -16,6 +16,11 @@ stored in the `adherents` table can then authenticate through Keycloak.
 The shaded JAR already embeds the MariaDB JDBC driver so no additional build
 options are necessary.
 
+This provider performs direct SQL queries through JDBC and does not use JPA.
+The plugin can therefore operate without JPA. A complete `persistence.xml`
+showing a typical Hibernate configuration is provided under `META-INF/services`
+for reference, but it is not required for normal operation.
+
 ## Running Keycloak
 
 Simply run `docker compose up` after packaging the provider. Keycloak uses its
