@@ -34,3 +34,14 @@ kc.sh build --db=mssql --transaction-xa-enabled=true \
 ```
 
 After building, launch Keycloak with `kc.sh start-dev` or `kc.sh start`.
+
+## Docker image
+
+A `Dockerfile` is provided to build Keycloak with the federation provider included. It downloads Keycloak 26.2.5, copies the built JAR and `application.properties`, then runs `kc.sh build` to fetch the MariaDB driver.
+
+Build the image and run it locally:
+
+```bash
+docker build -t custom-keycloak .
+docker run --rm -p 8080:8080 custom-keycloak
+```
