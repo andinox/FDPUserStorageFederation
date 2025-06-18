@@ -8,8 +8,9 @@ instance hosting a database named `adh6_prod` that stores external users.
 To build the federation you need Node.js. The recommended way to install it is
 with [nvm](https://github.com/nvm-sh/nvm).
 
-Build the provider with Maven and then use `docker compose up --build` to build
-the custom Keycloak image and start the stack. The provider JAR and
+Build the provider with Maven and build the custom Keycloak image manually with
+`docker build -t custom-keycloak .`. Once the image is available locally, start
+the stack with `docker compose up`. The provider JAR and
 `application.properties` are copied into the image so no extra volumes are
 required. External users stored in the `adherents` table can then authenticate
 through Keycloak.

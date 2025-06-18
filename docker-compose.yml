@@ -9,7 +9,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
   keycloak:
-    build: .
     image: custom-keycloak
     environment:
       KEYCLOAK_ADMIN: admin
