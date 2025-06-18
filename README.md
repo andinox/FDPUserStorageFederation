@@ -42,5 +42,6 @@ The relevant environment settings in `docker-compose.yml` look like this:
       QUARKUS_DATASOURCE_FEDERATION_JDBC_URL: jdbc:mariadb://mariadb:3306/adh6_prod
       QUARKUS_DATASOURCE_FEDERATION_USERNAME: keycloak
       QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_DRIVER: org.mariadb.jdbc.MariaDbXADataSource
       QUARKUS_DATASOURCE_FEDERATION_JDBC_TRANSACTIONS: xa
 ```
