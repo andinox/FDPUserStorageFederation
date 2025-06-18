@@ -1,31 +1,20 @@
 version: '3.8'
 services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloak
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
   keycloak:
-    image: custom-keycloak
+    image: quay.io/keycloak/keycloak:26.2.5
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_DB: postgres
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
-      KC_DB_URL_HOST: postgres
-      KC_DB_URL_DATABASE: keycloak
       QUARKUS_DATASOURCE_FEDERATION_JDBC_URL: jdbc:mariadb://mariadb:3306/adh6_prod
       QUARKUS_DATASOURCE_FEDERATION_USERNAME: keycloak
       QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
       QUARKUS_HIBERNATE_ORM_FEDERATION_DATASOURCE: federation
       QUARKUS_HIBERNATE_ORM_FEDERATION_DIALECT: org.hibernate.dialect.MariaDBDialect
     command: start-dev
+    volumes:
+      - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation.jar
+      - ./src/main/resources/application.properties:/opt/keycloak/conf/application.properties:ro
     depends_on:
-      - postgres
       - mariadb
     ports:
       - "8080:8080"
@@ -40,5 +29,4 @@ services:
       - mariadb_data:/var/lib/mysql
       - ./sql:/docker-entrypoint-initdb.d:ro
 volumes:
-  postgres_data:
   mariadb_data:
