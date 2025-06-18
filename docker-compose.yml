@@ -13,7 +13,6 @@ services:
     command: start-dev
     volumes:
       - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation.jar
-      - ./src/main/resources/application.properties:/opt/keycloak/conf/application.properties:ro
     depends_on:
       - mariadb
     ports:
