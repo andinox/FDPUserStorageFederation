@@ -16,6 +16,9 @@ stored in the `adherents` table can then authenticate through Keycloak.
 The shaded JAR already embeds the MariaDB JDBC driver so no additional build
 options are necessary.
 
+This provider performs direct SQL queries through JDBC and does not use JPA.
+Therefore no `persistence.xml` is required.
+
 ## Running Keycloak
 
 Simply run `docker compose up` after packaging the provider. Keycloak uses its
