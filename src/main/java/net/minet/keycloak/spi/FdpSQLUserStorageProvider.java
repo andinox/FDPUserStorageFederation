@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import net.minet.keycloak.spi.entity.ExternalUser;
+import org.jboss.logging.Logger;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputUpdater;
@@ -31,6 +32,8 @@ public class FdpSQLUserStorageProvider implements
         CredentialInputUpdater,
         UserRegistrationProvider,
         UserQueryProvider {
+
+    private static final Logger logger = Logger.getLogger(FdpSQLUserStorageProvider.class);
 
     protected KeycloakSession session;
     protected DataSource dataSource;
@@ -81,7 +84,7 @@ public class FdpSQLUserStorageProvider implements
                 }
             }
         } catch (NumberFormatException | SQLException e) {
-            // ignore
+            logger.warn("Failed to get user by id " + id + ": " + e.getMessage());
         }
         return null;
     }
@@ -97,7 +100,7 @@ public class FdpSQLUserStorageProvider implements
                 }
             }
         } catch (SQLException e) {
-            // ignore
+            logger.warn("Failed to get user by username " + username + ": " + e.getMessage());
         }
         return null;
     }
@@ -113,7 +116,7 @@ public class FdpSQLUserStorageProvider implements
                 }
             }
         } catch (SQLException e) {
-            // ignore
+            logger.warn("Failed to get user by email " + email + ": " + e.getMessage());
         }
         return null;
     }
@@ -132,6 +135,7 @@ public class FdpSQLUserStorageProvider implements
             ps.setInt(2, Integer.parseInt(user.getId()));
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            logger.warn("Failed to update credential for user " + user.getId() + ": " + e.getMessage());
             return false;
         }
     }
@@ -163,7 +167,7 @@ public class FdpSQLUserStorageProvider implements
                 }
             }
         } catch (SQLException e) {
-            // ignore
+            logger.warn("Failed to validate credential for user " + user.getId() + ": " + e.getMessage());
         }
         return false;
     }
@@ -225,7 +229,7 @@ public class FdpSQLUserStorageProvider implements
                 }
             }
         } catch (SQLException e) {
-            // ignore
+            logger.warn("Failed to count users: " + e.getMessage());
         }
         return 0;
     }
