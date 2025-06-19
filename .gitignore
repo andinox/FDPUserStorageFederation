@@ -1,0 +1,9 @@
+# Build outputs
+/target/
+
+# IDE configurations
+/.idea/
+/.vscode/
+
+# OS metadata
+*.DS_Store
