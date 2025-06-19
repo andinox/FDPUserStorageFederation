@@ -1,47 +1,50 @@
 # FDP User Storage Federation
 
-This module provides a simple Keycloak 26.2.5 user storage provider backed by a MariaDB table named `adherents`.
-The table schema is included in [sql/cas_schema.sql](sql/cas_schema.sql).
-Sample users are inserted automatically from [sql/cas_data.sql](sql/cas_data.sql).
+[![Build](https://github.com/your-org/FDPUserStorageFederation/actions/workflows/maven.yml/badge.svg)](https://github.com/your-org/FDPUserStorageFederation/actions)
+[![License](https://img.shields.io/github/license/your-org/FDPUserStorageFederation?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/github/v/release/your-org/FDPUserStorageFederation.svg?style=flat-square)](https://github.com/your-org/FDPUserStorageFederation/releases/latest)
+[![Issues](https://img.shields.io/github/issues/your-org/FDPUserStorageFederation.svg?style=flat-square)](https://github.com/your-org/FDPUserStorageFederation/issues)
 
-The `docker-compose.yml` file provisions Keycloak together with PostgreSQL for
-the Keycloak internal database and a MariaDB instance hosting a database named
-`adh6_prod` that stores external users. Both the default datasource and the
-federation datasource use **XA** transactions. Keycloak's ephemeral development
-database already supports XA, and the
-federation datasource is created programmatically using
-`MariaDbXADataSource`.
-To build the federation you need Node.js. The recommended way to install it is
-with [nvm](https://github.com/nvm-sh/nvm).
+A Keycloak 26.2.5 user storage provider bridging external accounts stored in a MariaDB table.
 
-Build the provider with Maven and then start the stack with `docker compose up`.
-The compose file mounts the built JAR and `application.properties` into the
-official Keycloak image so no custom Dockerfile is required. External users
-stored in the `adherents` table can then authenticate through Keycloak.
+## 🚀 Features
 
-The shaded JAR already embeds the MariaDB JDBC driver so no additional build
-options are necessary.
+- Connects to a MariaDB database containing an `adherents` table.
+- Works with Keycloak's ephemeral development database or any PostgreSQL instance.
+- Uses XA transactions for both datasources.
+- Handles credentials hashed with MD4 (UTF-16LE).
+- Runs from the official Keycloak image without a custom Dockerfile.
 
-The provider also exposes the `ldap_login` column as a `ldapLogin` attribute on
-Keycloak user profiles. This attribute can be read and updated through the
-standard user attribute APIs.
+## 📋 Versions
 
-This provider performs direct SQL queries through JDBC and does not use JPA.
-The plugin can therefore operate without JPA. A complete `persistence.xml`
-showing a typical Hibernate configuration is provided under `META-INF/services`
-for reference, but it is not required for normal operation.
+![Java](https://img.shields.io/badge/Java-21-blue?style=flat-square)
+![Keycloak](https://img.shields.io/badge/Keycloak-26.2.5-red?style=flat-square)
+![Quarkus](https://img.shields.io/badge/Quarkus-3.20.1-orange?style=flat-square)
+![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2.x-blue?style=flat-square)
+![Node.js](https://img.shields.io/badge/Node.js-via%20nvm-brightgreen?style=flat-square)
 
-Passwords in the external table are stored as MD4 hashes of the UTF‑16LE
-representation of the clear-text password. The federation module automatically
-computes this hash when validating or updating credentials.
+The database schema and seed data are located under [`sql`](sql).
 
-## Running Keycloak
+## 🛠️ Build
 
-Simply run `docker compose up` after packaging the provider. Keycloak uses its
-ephemeral development database and connects to the external MariaDB instance for
-federated users.
+1. Install the prerequisites.
+2. Package the provider:
 
-The relevant environment settings in `docker-compose.yml` look like this:
+```bash
+mvn package
+```
+
+This produces `target/UserStorageFederation-0.0.1.jar` with the MariaDB driver included.
+
+## 🚢 Docker Compose
+
+Run the development stack:
+
+```bash
+docker compose up
+```
+
+Keycloak exposes port `8080` and connects to PostgreSQL for its internal data and to MariaDB for federated users. The relevant settings are in [`docker-compose.yml`](docker-compose.yml):
 
 ```yaml
   keycloak:
@@ -60,6 +63,12 @@ The relevant environment settings in `docker-compose.yml` look like this:
       QUARKUS_DATASOURCE_FEDERATION_JDBC_TRANSACTIONS: xa
 ```
 
-For production you can use `docker compose -f docker-compose.prod.yml up` which
-starts Keycloak in production mode (`start` command) but otherwise uses the same
-services.
+For production, launch the stack in Keycloak production mode:
+
+```bash
+docker compose -f docker-compose.prod.yml up
+```
+
+## ⚖️ License
+
+This project is released under the [MIT License](LICENSE).
