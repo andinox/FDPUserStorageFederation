@@ -9,6 +9,10 @@ import org.keycloak.credential.hash.PasswordHashProvider;
 import org.keycloak.models.PasswordPolicy;
 import org.keycloak.models.credential.PasswordCredentialModel;
 
+/**
+ * Password hash provider that computes an MD4 digest of the UTF-16 encoded
+ * password. Used to verify passwords from legacy systems.
+ */
 public class Md4Utf16PasswordHashProvider implements PasswordHashProvider {
     public static final String ID = "md4-utf16";
     private final int defaultIterations;

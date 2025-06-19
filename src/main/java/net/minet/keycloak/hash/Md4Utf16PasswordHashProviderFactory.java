@@ -6,6 +6,9 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.credential.hash.PasswordHashProvider;
 import org.keycloak.credential.hash.PasswordHashProviderFactory;
 
+/**
+ * Factory that supplies {@link Md4Utf16PasswordHashProvider} to Keycloak.
+ */
 public class Md4Utf16PasswordHashProviderFactory implements PasswordHashProviderFactory {
     @Override
     public PasswordHashProvider create(KeycloakSession session) {

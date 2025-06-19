@@ -3,6 +3,9 @@ package net.minet.keycloak.spi.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Simple data object representing a user record in the external SQL database.
+ */
 public class ExternalUser {
     private Integer id;
 
