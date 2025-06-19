@@ -54,6 +54,11 @@ public class FdpSQLUserStorageProvider implements
         user.setEmail(rs.getString("mail"));
         user.setUsername(rs.getString("login"));
         user.setPassword(rs.getString("password"));
+        try {
+            user.setLdapLogin(rs.getString("ldap_login"));
+        } catch (SQLException ignore) {
+            // column may not exist
+        }
         return user;
     }
 
@@ -67,7 +72,7 @@ public class FdpSQLUserStorageProvider implements
         try {
             int userId = Integer.parseInt(id);
             try (Connection c = dataSource.getConnection();
-                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE id = ?")) {
+                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE id = ?")) {
                 ps.setInt(1, userId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -84,7 +89,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByUsername(RealmModel realm, String username) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE login = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE login = ?")) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -100,7 +105,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByEmail(RealmModel realm, String email) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE mail = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE mail = ?")) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -195,7 +200,7 @@ public class FdpSQLUserStorageProvider implements
 
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents LIMIT ? OFFSET ?")) {
             ps.setInt(1, max);
             ps.setInt(2, first);
             try (ResultSet rs = ps.executeQuery()) {
@@ -229,7 +234,7 @@ public class FdpSQLUserStorageProvider implements
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
         String pattern = "%" + search.toLowerCase() + "%";
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
             ps.setString(1, pattern);
             ps.setInt(2, max);
             ps.setInt(3, first);
@@ -317,6 +322,41 @@ public class FdpSQLUserStorageProvider implements
         @Override
         public void setLastName(String lastName) {
             user.setLastName(lastName);
+        }
+
+        @Override
+        public java.util.stream.Stream<String> getAttributeStream(String name) {
+            if ("ldapLogin".equals(name)) {
+                return user.getLdapLogin() == null ? java.util.stream.Stream.empty() : java.util.stream.Stream.of(user.getLdapLogin());
+            }
+            return super.getAttributeStream(name);
+        }
+
+        @Override
+        public void setSingleAttribute(String name, String value) {
+            if ("ldapLogin".equals(name)) {
+                user.setLdapLogin(value);
+            } else {
+                super.setSingleAttribute(name, value);
+            }
+        }
+
+        @Override
+        public void removeAttribute(String name) {
+            if ("ldapLogin".equals(name)) {
+                user.setLdapLogin(null);
+            } else {
+                super.removeAttribute(name);
+            }
+        }
+
+        @Override
+        public java.util.Map<String, java.util.List<String>> getAttributes() {
+            java.util.Map<String, java.util.List<String>> attrs = new java.util.HashMap<>(super.getAttributes());
+            if (user.getLdapLogin() != null) {
+                attrs.put("ldapLogin", java.util.List.of(user.getLdapLogin()));
+            }
+            return attrs;
         }
     }
 }

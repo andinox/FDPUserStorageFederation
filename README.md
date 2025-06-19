@@ -22,6 +22,10 @@ stored in the `adherents` table can then authenticate through Keycloak.
 The shaded JAR already embeds the MariaDB JDBC driver so no additional build
 options are necessary.
 
+The provider also exposes the `ldap_login` column as a `ldapLogin` attribute on
+Keycloak user profiles. This attribute can be read and updated through the
+standard user attribute APIs.
+
 This provider performs direct SQL queries through JDBC and does not use JPA.
 The plugin can therefore operate without JPA. A complete `persistence.xml`
 showing a typical Hibernate configuration is provided under `META-INF/services`
