@@ -1,8 +1,9 @@
 package org.mariadb.jdbc;
 
 /**
- * Compatibility wrapper for {@link MariaDbDataSource} implementing the deprecated
- * {@code MariaDbXADataSource} name used by older code.
+ * Shim for legacy configuration.
+ * This class exists only for backwards compatibility and may be removed in a
+ * future release. Use {@link MariaDbDataSource} instead.
  */
 public class MariaDbXADataSource extends MariaDbDataSource {
 
