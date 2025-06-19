@@ -12,7 +12,7 @@ services:
     command: start
     volumes:
       - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation.jar
-      - ./application.properties:/opt/keycloak/conf/application.properties:ro
+      - ./src/main/resources/application.properties:/opt/keycloak/conf/application.properties:ro
     depends_on:
       - mariadb
       - postgres
