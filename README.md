@@ -41,6 +41,8 @@ mvn package
 
 The command reads `application.properties` to build `target/UserStorageFederation-0.0.1.jar` with the MariaDB driver included.
 
+The Quarkus configuration resides in `src/main/resources/application.properties` and is mounted into the Keycloak container by Docker Compose.
+
 ## 🚢 Docker Compose
 
 Run the development stack:
