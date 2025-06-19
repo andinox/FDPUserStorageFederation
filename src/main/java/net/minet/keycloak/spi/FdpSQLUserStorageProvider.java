@@ -2,6 +2,10 @@ package net.minet.keycloak.spi;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import net.minet.keycloak.spi.entity.ExternalUser;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
@@ -119,7 +123,7 @@ public class FdpSQLUserStorageProvider implements
         if (!supportsCredentialType(input.getType())) return false;
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement("UPDATE adherents SET password = ? WHERE id = ?")) {
-            ps.setString(1, input.getChallengeResponse());
+            ps.setString(1, md4Hex(input.getChallengeResponse()));
             ps.setInt(2, Integer.parseInt(user.getId()));
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -150,7 +154,7 @@ public class FdpSQLUserStorageProvider implements
             ps.setInt(1, Integer.parseInt(user.getId()));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return input.getChallengeResponse().equals(rs.getString(1));
+                    return md4Hex(input.getChallengeResponse()).equalsIgnoreCase(rs.getString(1));
                 }
             }
         } catch (SQLException e) {
@@ -254,6 +258,16 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public Stream<UserModel> searchForUserByUserAttributeStream(RealmModel realm, String attr, String value) {
         return Stream.empty();
+    }
+
+    private String md4Hex(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD4");
+            byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_16LE));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD4 algorithm not available", e);
+        }
     }
 
     private static class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
