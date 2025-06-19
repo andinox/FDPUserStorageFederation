@@ -1,9 +1,6 @@
 package net.minet.keycloak.hash;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
+import net.minet.keycloak.hash.Md4Util;
 
 import org.keycloak.credential.hash.PasswordHashProvider;
 import org.keycloak.models.PasswordPolicy;
@@ -34,13 +31,7 @@ public class Md4Utf16PasswordHashProvider implements PasswordHashProvider {
 
     @Override
     public String encode(String rawPassword, int iterations) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD4");
-            byte[] digest = md.digest(rawPassword.getBytes(StandardCharsets.UTF_16LE));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("MD4 algorithm not available", e);
-        }
+        return Md4Util.md4Hex(rawPassword);
     }
 
     @Override
