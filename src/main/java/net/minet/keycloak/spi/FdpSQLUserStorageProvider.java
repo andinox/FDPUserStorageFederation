@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import net.minet.keycloak.spi.entity.ExternalUser;
+import org.jboss.logging.Logger;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputUpdater;
@@ -35,6 +36,7 @@ public class FdpSQLUserStorageProvider implements
     protected KeycloakSession session;
     protected DataSource dataSource;
     protected ComponentModel model;
+    private static final Logger LOG = Logger.getLogger(FdpSQLUserStorageProvider.class);
 
     public FdpSQLUserStorageProvider(KeycloakSession session, ComponentModel model, DataSource dataSource) {
         this.session = session;
@@ -225,7 +227,8 @@ public class FdpSQLUserStorageProvider implements
                 }
             }
         } catch (SQLException e) {
-            // ignore
+            LOG.error("Failed to count users", e);
+            throw new RuntimeException("Could not count users", e);
         }
         return 0;
     }
