@@ -7,6 +7,10 @@ import org.keycloak.component.ComponentModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.storage.UserStorageProviderFactory;
 
+/**
+ * Factory that creates {@link FdpSQLUserStorageProvider} instances and
+ * initializes the SQL datasource.
+ */
 public class FdpSQLUserStorageProviderFactory implements UserStorageProviderFactory<FdpSQLUserStorageProvider> {
     public static final String PROVIDER_NAME = "fdp-sql";
 

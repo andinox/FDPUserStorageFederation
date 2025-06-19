@@ -22,6 +22,10 @@ import org.keycloak.storage.user.UserRegistrationProvider;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * User storage provider backed by an external SQL database. It exposes users
+ * to Keycloak and supports credential validation and updates.
+ */
 public class FdpSQLUserStorageProvider implements
         UserStorageProvider,
         UserLookupProvider,
