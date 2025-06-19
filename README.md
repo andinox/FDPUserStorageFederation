@@ -76,6 +76,14 @@ For production, launch the stack in Keycloak production mode:
 docker compose -f docker-compose.prod.yml up
 ```
 
+## 📝 Logging
+
+Keycloak relies on Quarkus for its logging system. Log levels can be adjusted by
+setting the `quarkus.log.level` property or the `QUARKUS_LOG_LEVEL` environment
+variable, e.g. `QUARKUS_LOG_LEVEL=DEBUG` for verbose output.  For more advanced
+customisation provide a `log4j2.properties` file on the classpath. A sample
+configuration is included under [`src/main/resources`](src/main/resources).
+
 ## ⚖️ License
 
 This project is released under the [MIT License](LICENSE).
