@@ -1,9 +1,9 @@
 # FDP User Storage Federation
 
-[![Build](https://github.com/your-org/FDPUserStorageFederation/actions/workflows/maven.yml/badge.svg)](https://github.com/your-org/FDPUserStorageFederation/actions)
-[![License](https://img.shields.io/github/license/your-org/FDPUserStorageFederation?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/github/v/release/your-org/FDPUserStorageFederation.svg?style=flat-square)](https://github.com/your-org/FDPUserStorageFederation/releases/latest)
-[![Issues](https://img.shields.io/github/issues/your-org/FDPUserStorageFederation.svg?style=flat-square)](https://github.com/your-org/FDPUserStorageFederation/issues)
+[![Build](https://github.com/andinox/FDPUserStorageFederation/actions/workflows/maven.yml/badge.svg)](https://github.com/andinox/FDPUserStorageFederation/actions)
+[![License](https://img.shields.io/github/license/andinox/FDPUserStorageFederation?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/github/v/release/andinox/FDPUserStorageFederation.svg?style=flat-square)](https://github.com/andinox/FDPUserStorageFederation/releases/latest)
+[![Issues](https://img.shields.io/github/issues/andinox/FDPUserStorageFederation.svg?style=flat-square)](https://github.com/andinox/FDPUserStorageFederation/issues)
 
 A Keycloak 26.2.5 user storage provider bridging external accounts stored in a MariaDB table.
 
@@ -25,16 +25,21 @@ A Keycloak 26.2.5 user storage provider bridging external accounts stored in a M
 
 The database schema and seed data are located under [`sql`](sql).
 
+## 🧰 Prerequisites
+
+- Java 21
+- Maven 3.9 or newer
+
 ## 🛠️ Build
 
 1. Install the prerequisites.
-2. Package the provider:
+2. Package the provider using the repository's `application.properties`:
 
 ```bash
 mvn package
 ```
 
-This produces `target/UserStorageFederation-0.0.1.jar` with the MariaDB driver included.
+The command reads `application.properties` to build `target/UserStorageFederation-0.0.1.jar` with the MariaDB driver included.
 
 ## 🚢 Docker Compose
 
