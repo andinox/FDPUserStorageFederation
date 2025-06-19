@@ -9,6 +9,11 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: secret
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_URL: jdbc:mariadb://mariadb:3306/adh6_prod
+      QUARKUS_DATASOURCE_FEDERATION_USERNAME: keycloak
+      QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_DRIVER: org.mariadb.jdbc.MariaDbXADataSource
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_TRANSACTIONS: xa
     command: start
     volumes:
       - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation.jar
