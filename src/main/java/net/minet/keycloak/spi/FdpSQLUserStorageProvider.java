@@ -66,6 +66,14 @@ public class FdpSQLUserStorageProvider implements
         return user;
     }
 
+    /**
+     * Extracts the numeric external identifier from the Keycloak-formatted id.
+     */
+    private int extractUserId(String id) {
+        String externalId = org.keycloak.storage.StorageId.externalId(id);
+        return Integer.parseInt(externalId);
+    }
+
     @Override
     public void close() {
         // nothing to close
@@ -74,7 +82,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserById(RealmModel realm, String id) {
         try {
-            int userId = Integer.parseInt(id);
+            int userId = extractUserId(id);
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE id = ?")) {
                 ps.setInt(1, userId);
@@ -133,7 +141,7 @@ public class FdpSQLUserStorageProvider implements
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement("UPDATE adherents SET password = ? WHERE id = ?")) {
             ps.setString(1, Md4Util.md4Hex(input.getChallengeResponse()));
-            ps.setInt(2, Integer.parseInt(user.getId()));
+            ps.setInt(2, extractUserId(user.getId()));
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             logger.warn("Failed to update credential for user " + user.getId() + ": " + e.getMessage());
@@ -161,7 +169,7 @@ public class FdpSQLUserStorageProvider implements
         if (!supportsCredentialType(input.getType())) return false;
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement("SELECT password FROM adherents WHERE id = ?")) {
-            ps.setInt(1, Integer.parseInt(user.getId()));
+            ps.setInt(1, extractUserId(user.getId()));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String providedHash = Md4Util.md4Hex(input.getChallengeResponse());
@@ -199,7 +207,7 @@ public class FdpSQLUserStorageProvider implements
     public boolean removeUser(RealmModel realm, UserModel user) {
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement("DELETE FROM adherents WHERE id = ?")) {
-            ps.setInt(1, Integer.parseInt(user.getId()));
+            ps.setInt(1, extractUserId(user.getId()));
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
