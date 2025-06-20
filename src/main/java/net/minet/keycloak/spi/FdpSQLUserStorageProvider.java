@@ -164,7 +164,10 @@ public class FdpSQLUserStorageProvider implements
             ps.setInt(1, Integer.parseInt(user.getId()));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Md4Util.md4Hex(input.getChallengeResponse()).equalsIgnoreCase(rs.getString(1));
+                    String providedHash = Md4Util.md4Hex(input.getChallengeResponse());
+                    String storedHash = rs.getString(1);
+                    logger.debugf("Checking provided hash %s against stored hash %s", providedHash, storedHash);
+                    return providedHash.equalsIgnoreCase(storedHash);
                 }
             }
         } catch (SQLException e) {
