@@ -317,6 +317,19 @@ public class FdpSQLUserStorageProvider implements
             super(session, realm, model);
             this.user = user;
             this.storageId = new org.keycloak.storage.StorageId(model.getId(), String.valueOf(user.getId()));
+            this.addDefaults();
+        }
+
+        private void addDefaults() {
+            if (user.getEmail() != null) {
+                setEmail(user.getEmail());
+            }
+            if (user.getFirstName() != null) {
+                setFirstName(user.getFirstName());
+            }
+            if (user.getLastName() != null) {
+                setLastName(user.getLastName());
+            }
         }
 
         @Override
