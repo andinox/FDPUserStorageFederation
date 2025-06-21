@@ -19,6 +19,7 @@ import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
 import org.keycloak.storage.user.UserLookupProvider;
 import org.keycloak.storage.user.UserQueryProvider;
 import org.keycloak.storage.user.UserRegistrationProvider;
+import org.keycloak.storage.UserStoragePrivateUtil;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -98,7 +99,8 @@ public class FdpSQLUserStorageProvider implements
         try {
             userId = extractUserId(id);
         } catch (NumberFormatException nfe) {
-            UserModel local = session.userLocalStorage().getUserById(realm, id);
+            UserModel local = UserStoragePrivateUtil.userLocalStorage(session)
+                    .getUserById(realm, id);
             if (local != null) {
                 return getUserByUsername(realm, local.getUsername());
             }
