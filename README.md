@@ -80,9 +80,15 @@ docker compose -f docker-compose.prod.yml up
 
 Keycloak relies on Quarkus for its logging system. Log levels can be adjusted by
 setting the `quarkus.log.level` property or the `QUARKUS_LOG_LEVEL` environment
-variable, e.g. `QUARKUS_LOG_LEVEL=DEBUG` for verbose output.  For more advanced
-customisation provide a `log4j2.properties` file on the classpath. A sample
-configuration is included under [`src/main/resources`](src/main/resources).
+variable, e.g. `QUARKUS_LOG_LEVEL=DEBUG` for verbose output. The bundled
+`log4j2.properties` reads this value so there is no need to edit the file.
+For more advanced customisation provide your own `log4j2.properties` on the
+classpath. A sample configuration is included under
+[`src/main/resources`](src/main/resources).
+
+## 🩹 Troubleshooting
+
+If login attempts fail with `invalid_user_credentials` even when the password is correct, verify that you are running a version that includes the fix for user ID parsing. Older builds misinterpreted Keycloak storage identifiers and would always reject passwords. The provider also hashes plain-text passwords on-the-fly so it works whether the database stores MD4 digests or raw strings.
 
 ## ⚖️ License
 

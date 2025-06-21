@@ -143,7 +143,7 @@ public class FdpSQLUserStorageProvider implements
             ps.setString(1, Md4Util.md4Hex(input.getChallengeResponse()));
             ps.setInt(2, extractUserId(user.getId()));
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
+        } catch (NumberFormatException | SQLException e) {
             logger.warn("Failed to update credential for user " + user.getId() + ": " + e.getMessage());
             return false;
         }
@@ -175,10 +175,13 @@ public class FdpSQLUserStorageProvider implements
                     String providedHash = Md4Util.md4Hex(input.getChallengeResponse());
                     String storedHash = rs.getString(1);
                     logger.debugf("Checking provided hash %s against stored hash %s", providedHash, storedHash);
+                    if (storedHash != null && !storedHash.matches("[0-9a-fA-F]{32}")) {
+                        storedHash = Md4Util.md4Hex(storedHash);
+                    }
                     return providedHash.equalsIgnoreCase(storedHash);
                 }
             }
-        } catch (SQLException e) {
+        } catch (NumberFormatException | SQLException e) {
             logger.warn("Failed to validate credential for user " + user.getId() + ": " + e.getMessage());
         }
         return false;
@@ -209,7 +212,8 @@ public class FdpSQLUserStorageProvider implements
              PreparedStatement ps = c.prepareStatement("DELETE FROM adherents WHERE id = ?")) {
             ps.setInt(1, extractUserId(user.getId()));
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
+        } catch (NumberFormatException | SQLException e) {
+            logger.warn("Failed to remove user " + user.getId() + ": " + e.getMessage());
             return false;
         }
     }

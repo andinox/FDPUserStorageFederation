@@ -6,6 +6,8 @@ import org.keycloak.component.ComponentModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.credential.CredentialInput;
+import org.keycloak.credential.CredentialModel;
 import org.mockito.Mockito;
 
 import javax.sql.DataSource;
@@ -39,5 +41,19 @@ public class FdpSQLUserStorageProviderTest {
         assertNotNull(user);
         assertEquals("jdoe", user.getUsername());
         assertEquals("john@example.com", user.getEmail());
+    }
+
+    @Test
+    public void testIsValidWithPlainPassword() {
+        KeycloakSession session = Mockito.mock(KeycloakSession.class);
+        ComponentModel model = Mockito.mock(ComponentModel.class);
+        RealmModel realm = Mockito.mock(RealmModel.class);
+        FdpSQLUserStorageProvider provider = new FdpSQLUserStorageProvider(session, model, ds);
+        UserModel user = provider.getUserByUsername(realm, "jdoe");
+        CredentialInput cred = new CredentialInput() {
+            @Override public String getType() { return CredentialModel.PASSWORD; }
+            @Override public String getChallengeResponse() { return "pass"; }
+        };
+        assertTrue(provider.isValid(realm, user, cred));
     }
 }
