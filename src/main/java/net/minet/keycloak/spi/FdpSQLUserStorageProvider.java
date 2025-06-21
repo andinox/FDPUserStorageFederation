@@ -63,6 +63,11 @@ public class FdpSQLUserStorageProvider implements
         } catch (SQLException ignore) {
             // column may not exist
         }
+        try {
+            user.setComments(rs.getString("commentaires"));
+        } catch (SQLException ignore) {
+            // column may not exist
+        }
         return user;
     }
 
@@ -84,7 +89,7 @@ public class FdpSQLUserStorageProvider implements
         try {
             int userId = extractUserId(id);
             try (Connection c = dataSource.getConnection();
-                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE id = ?")) {
+                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE id = ?")) {
                 ps.setInt(1, userId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -101,7 +106,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByUsername(RealmModel realm, String username) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE login = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE login = ?")) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -117,7 +122,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByEmail(RealmModel realm, String email) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE mail = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE mail = ?")) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -220,7 +225,7 @@ public class FdpSQLUserStorageProvider implements
 
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents LIMIT ? OFFSET ?")) {
             ps.setInt(1, max);
             ps.setInt(2, first);
             try (ResultSet rs = ps.executeQuery()) {
@@ -254,7 +259,7 @@ public class FdpSQLUserStorageProvider implements
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
         String pattern = "%" + search.toLowerCase() + "%";
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
             ps.setString(1, pattern);
             ps.setInt(2, max);
             ps.setInt(3, first);
@@ -340,6 +345,9 @@ public class FdpSQLUserStorageProvider implements
             if ("ldapLogin".equals(name)) {
                 return user.getLdapLogin() == null ? java.util.stream.Stream.empty() : java.util.stream.Stream.of(user.getLdapLogin());
             }
+            if ("general".equals(name)) {
+                return user.getComments() == null ? java.util.stream.Stream.empty() : java.util.stream.Stream.of(user.getComments());
+            }
             return super.getAttributeStream(name);
         }
 
@@ -347,6 +355,8 @@ public class FdpSQLUserStorageProvider implements
         public void setSingleAttribute(String name, String value) {
             if ("ldapLogin".equals(name)) {
                 user.setLdapLogin(value);
+            } else if ("general".equals(name)) {
+                user.setComments(value);
             } else {
                 super.setSingleAttribute(name, value);
             }
@@ -356,6 +366,8 @@ public class FdpSQLUserStorageProvider implements
         public void removeAttribute(String name) {
             if ("ldapLogin".equals(name)) {
                 user.setLdapLogin(null);
+            } else if ("general".equals(name)) {
+                user.setComments(null);
             } else {
                 super.removeAttribute(name);
             }
@@ -367,7 +379,20 @@ public class FdpSQLUserStorageProvider implements
             if (user.getLdapLogin() != null) {
                 attrs.put("ldapLogin", java.util.List.of(user.getLdapLogin()));
             }
+            if (user.getComments() != null) {
+                attrs.put("general", java.util.List.of(user.getComments()));
+            }
             return attrs;
+        }
+
+        @Override
+        public boolean isEmailVerified() {
+            return true;
+        }
+
+        @Override
+        public void setEmailVerified(boolean verified) {
+            // always verified, ignore
         }
     }
 }
