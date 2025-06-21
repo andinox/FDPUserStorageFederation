@@ -26,8 +26,8 @@ public class FdpSQLUserStorageProviderTest {
         h2.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         ds = h2;
         try (Connection c = ds.getConnection(); Statement st = c.createStatement()) {
-            st.execute("CREATE TABLE adherents (id INT AUTO_INCREMENT PRIMARY KEY, nom VARCHAR(50), prenom VARCHAR(50), mail VARCHAR(50), login VARCHAR(50), password VARCHAR(64), ldap_login VARCHAR(50))");
-            st.execute("INSERT INTO adherents (nom, prenom, mail, login, password, ldap_login) VALUES ('Doe', 'John', 'john@example.com', 'jdoe', 'pass', 'jdoe')");
+            st.execute("CREATE TABLE adherents (id INT AUTO_INCREMENT PRIMARY KEY, nom VARCHAR(50), prenom VARCHAR(50), mail VARCHAR(50), login VARCHAR(50), password VARCHAR(64), ldap_login VARCHAR(50), commentaires TEXT)");
+            st.execute("INSERT INTO adherents (nom, prenom, mail, login, password, ldap_login, commentaires) VALUES ('Doe', 'John', 'john@example.com', 'jdoe', 'pass', 'jdoe', 'note')");
         }
     }
 
