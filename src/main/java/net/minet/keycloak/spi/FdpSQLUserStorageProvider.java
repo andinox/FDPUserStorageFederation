@@ -94,18 +94,27 @@ public class FdpSQLUserStorageProvider implements
 
     @Override
     public UserModel getUserById(RealmModel realm, String id) {
+        Integer userId = null;
         try {
-            int userId = extractUserId(id);
-            try (Connection c = dataSource.getConnection();
-                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE id = ?")) {
-                ps.setInt(1, userId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return createAdapter(realm, mapUser(rs));
-                    }
+            userId = extractUserId(id);
+        } catch (NumberFormatException nfe) {
+            UserModel local = session.userLocalStorage().getUserById(realm, id);
+            if (local != null) {
+                return getUserByUsername(realm, local.getUsername());
+            }
+            logger.warn("Failed to parse external id " + id + ": " + nfe.getMessage());
+            return null;
+        }
+
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE id = ?")) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return createAdapter(realm, mapUser(rs));
                 }
             }
-        } catch (NumberFormatException | SQLException e) {
+        } catch (SQLException e) {
             logger.warn("Failed to get user by id " + id + ": " + e.getMessage());
         }
         return null;
