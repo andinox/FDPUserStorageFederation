@@ -68,6 +68,14 @@ public class FdpSQLUserStorageProvider implements
         } catch (SQLException ignore) {
             // column may not exist
         }
+        try {
+            java.sql.Timestamp ts = rs.getTimestamp("created_at");
+            if (ts != null) {
+                user.setCreatedAt(ts.toLocalDateTime());
+            }
+        } catch (SQLException ignore) {
+            // optional column
+        }
         return user;
     }
 
@@ -89,7 +97,7 @@ public class FdpSQLUserStorageProvider implements
         try {
             int userId = extractUserId(id);
             try (Connection c = dataSource.getConnection();
-                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE id = ?")) {
+                 PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE id = ?")) {
                 ps.setInt(1, userId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -106,7 +114,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByUsername(RealmModel realm, String username) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE login = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE login = ?")) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -122,7 +130,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByEmail(RealmModel realm, String email) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE mail = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE mail = ?")) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -225,7 +233,7 @@ public class FdpSQLUserStorageProvider implements
 
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents LIMIT ? OFFSET ?")) {
             ps.setInt(1, max);
             ps.setInt(2, first);
             try (ResultSet rs = ps.executeQuery()) {
@@ -259,7 +267,7 @@ public class FdpSQLUserStorageProvider implements
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
         String pattern = "%" + search.toLowerCase() + "%";
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
             ps.setString(1, pattern);
             ps.setInt(2, max);
             ps.setInt(3, first);
@@ -338,6 +346,26 @@ public class FdpSQLUserStorageProvider implements
         @Override
         public void setLastName(String lastName) {
             user.setLastName(lastName);
+        }
+
+        @Override
+        public Long getCreatedTimestamp() {
+            java.time.LocalDateTime ts = user.getCreatedAt();
+            if (ts != null) {
+                return ts.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+            }
+            return super.getCreatedTimestamp();
+        }
+
+        @Override
+        public void setCreatedTimestamp(Long timestamp) {
+            if (timestamp != null) {
+                java.time.Instant i = java.time.Instant.ofEpochMilli(timestamp);
+                user.setCreatedAt(java.time.LocalDateTime.ofInstant(i, java.time.ZoneId.systemDefault()));
+            } else {
+                user.setCreatedAt(null);
+            }
+            super.setCreatedTimestamp(timestamp);
         }
 
         @Override
