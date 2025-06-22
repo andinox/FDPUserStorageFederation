@@ -76,6 +76,10 @@ For production, launch the stack in Keycloak production mode:
 docker compose -f docker-compose.prod.yml up
 ```
 
+## 🎨 Keywind Theme
+
+This repository bundles the [Keywind](https://github.com/lukin/keywind) login theme under `themes/keywind`. Only the templates required for signing in and changing a password are included. Both development and production Compose files mount this directory into Keycloak so you can select the `keywind` theme in the administration console.
+
 ## 📝 Logging
 
 Keycloak relies on Quarkus for its logging system. Log levels can be adjusted by
