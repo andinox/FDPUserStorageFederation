@@ -18,6 +18,7 @@ services:
     volumes:
       - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation.jar
       - ./src/main/resources/application.properties:/opt/keycloak/conf/application.properties:ro
+      - ./themes/keywind:/opt/keycloak/themes/keywind:ro
     depends_on:
       - mariadb
       - postgres
