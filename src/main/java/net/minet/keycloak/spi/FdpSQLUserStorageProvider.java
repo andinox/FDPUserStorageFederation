@@ -20,6 +20,9 @@ import org.keycloak.storage.user.UserLookupProvider;
 import org.keycloak.storage.user.UserQueryProvider;
 import org.keycloak.storage.user.UserRegistrationProvider;
 import org.keycloak.storage.UserStoragePrivateUtil;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -426,14 +429,25 @@ public class FdpSQLUserStorageProvider implements
         }
 
         @Override
-        public java.util.Map<String, java.util.List<String>> getAttributes() {
-            java.util.Map<String, java.util.List<String>> attrs = new java.util.HashMap<>(super.getAttributes());
+        public Map<String, List<String>> getAttributes() {
+            HashMap<String, List<String>> attrs = new HashMap<>(super.getAttributes());
+
+            if (user.getEmail() != null) {
+                attrs.put("email", List.of(user.getEmail()));
+            }
+            if (user.getFirstName() != null) {
+                attrs.put("firstName", List.of(user.getFirstName()));
+            }
+            if (user.getLastName() != null) {
+                attrs.put("lastName", List.of(user.getLastName()));
+            }
             if (user.getLdapLogin() != null) {
-                attrs.put("ldapLogin", java.util.List.of(user.getLdapLogin()));
+                attrs.put("ldapLogin", List.of(user.getLdapLogin()));
             }
             if (user.getComments() != null) {
-                attrs.put("general", java.util.List.of(user.getComments()));
+                attrs.put("general", List.of(user.getComments()));
             }
+
             return attrs;
         }
 

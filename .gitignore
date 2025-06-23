@@ -7,3 +7,4 @@
 
 # OS metadata
 *.DS_Store
+docker-compose.yml
