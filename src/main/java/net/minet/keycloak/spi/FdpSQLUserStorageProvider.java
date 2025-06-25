@@ -63,7 +63,10 @@ public class FdpSQLUserStorageProvider implements
         user.setUsername(rs.getString("login"));
         user.setPassword(rs.getString("password"));
         try {
-            user.setLdapLogin(rs.getString("ldap_login"));
+            java.sql.Date dd = rs.getDate("date_de_depart");
+            if (dd != null) {
+                user.setDepartureDate(dd.toLocalDate());
+            }
         } catch (SQLException ignore) {
             // column may not exist
         }
@@ -73,12 +76,72 @@ public class FdpSQLUserStorageProvider implements
             // column may not exist
         }
         try {
+            user.setModeAssociation(rs.getByte("mode_association"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setAccessToken(rs.getString("access_token"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setSubnet(rs.getString("subnet"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setIp(rs.getString("ip"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setChambreId(rs.getInt("chambre_id"));
+        } catch (SQLException ignore) {
+        }
+        try {
             java.sql.Timestamp ts = rs.getTimestamp("created_at");
             if (ts != null) {
                 user.setCreatedAt(ts.toLocalDateTime());
             }
         } catch (SQLException ignore) {
-            // optional column
+        }
+        try {
+            java.sql.Timestamp ts = rs.getTimestamp("updated_at");
+            if (ts != null) {
+                user.setUpdatedAt(ts.toLocalDateTime());
+            }
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setEdminet(rs.getByte("edminet"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setIsNaina(rs.getByte("is_naina"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setMailingList(rs.getByte("mailinglist"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setMailMembership(rs.getInt("mail_membership"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            user.setLdapLogin(rs.getString("ldap_login"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            java.sql.Timestamp ts = rs.getTimestamp("datesignedhosting");
+            if (ts != null) {
+                user.setDateSignedHosting(ts.toLocalDateTime());
+            }
+        } catch (SQLException ignore) {
+        }
+        try {
+            java.sql.Timestamp ts = rs.getTimestamp("datesignedadhesion");
+            if (ts != null) {
+                user.setDateSignedAdhesion(ts.toLocalDateTime());
+            }
+        } catch (SQLException ignore) {
         }
         return user;
     }
@@ -112,7 +175,7 @@ public class FdpSQLUserStorageProvider implements
         }
 
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE id = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, date_de_depart, commentaires, mode_association, access_token, subnet, ip, chambre_id, created_at, updated_at, edminet, is_naina, mailinglist, mail_membership, ldap_login, datesignedhosting, datesignedadhesion FROM adherents WHERE id = ?")) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -128,7 +191,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByUsername(RealmModel realm, String username) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE login = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, date_de_depart, commentaires, mode_association, access_token, subnet, ip, chambre_id, created_at, updated_at, edminet, is_naina, mailinglist, mail_membership, ldap_login, datesignedhosting, datesignedadhesion FROM adherents WHERE login = ?")) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -144,7 +207,7 @@ public class FdpSQLUserStorageProvider implements
     @Override
     public UserModel getUserByEmail(RealmModel realm, String email) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE mail = ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, date_de_depart, commentaires, mode_association, access_token, subnet, ip, chambre_id, created_at, updated_at, edminet, is_naina, mailinglist, mail_membership, ldap_login, datesignedhosting, datesignedadhesion FROM adherents WHERE mail = ?")) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -247,7 +310,7 @@ public class FdpSQLUserStorageProvider implements
 
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, date_de_depart, commentaires, mode_association, access_token, subnet, ip, chambre_id, created_at, updated_at, edminet, is_naina, mailinglist, mail_membership, ldap_login, datesignedhosting, datesignedadhesion FROM adherents LIMIT ? OFFSET ?")) {
             ps.setInt(1, max);
             ps.setInt(2, first);
             try (ResultSet rs = ps.executeQuery()) {
@@ -281,7 +344,7 @@ public class FdpSQLUserStorageProvider implements
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
         String pattern = "%" + search.toLowerCase() + "%";
         try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, ldap_login, commentaires, created_at FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT id, nom, prenom, mail, login, password, date_de_depart, commentaires, mode_association, access_token, subnet, ip, chambre_id, created_at, updated_at, edminet, is_naina, mailinglist, mail_membership, ldap_login, datesignedhosting, datesignedadhesion FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
             ps.setString(1, pattern);
             ps.setInt(2, max);
             ps.setInt(3, first);
@@ -397,11 +460,9 @@ public class FdpSQLUserStorageProvider implements
 
         @Override
         public java.util.stream.Stream<String> getAttributeStream(String name) {
-            if ("ldapLogin".equals(name)) {
-                return user.getLdapLogin() == null ? java.util.stream.Stream.empty() : java.util.stream.Stream.of(user.getLdapLogin());
-            }
-            if ("general".equals(name)) {
-                return user.getComments() == null ? java.util.stream.Stream.empty() : java.util.stream.Stream.of(user.getComments());
+            Map<String, List<String>> all = getAttributes();
+            if (all.containsKey(name)) {
+                return all.get(name).stream();
             }
             return super.getAttributeStream(name);
         }
@@ -446,6 +507,49 @@ public class FdpSQLUserStorageProvider implements
             }
             if (user.getComments() != null) {
                 attrs.put("general", List.of(user.getComments()));
+            }
+
+            if (user.getDepartureDate() != null) {
+                attrs.put("departureDate", List.of(user.getDepartureDate().toString()));
+            }
+            if (user.getModeAssociation() != null) {
+                attrs.put("modeAssociation", List.of(Byte.toString(user.getModeAssociation())));
+            }
+            if (user.getAccessToken() != null) {
+                attrs.put("accessToken", List.of(user.getAccessToken()));
+            }
+            if (user.getSubnet() != null) {
+                attrs.put("subnet", List.of(user.getSubnet()));
+            }
+            if (user.getIp() != null) {
+                attrs.put("ip", List.of(user.getIp()));
+            }
+            if (user.getChambreId() != null) {
+                attrs.put("chambreId", List.of(Integer.toString(user.getChambreId())));
+            }
+            if (user.getCreatedAt() != null) {
+                attrs.put("createdAt", List.of(user.getCreatedAt().toString()));
+            }
+            if (user.getUpdatedAt() != null) {
+                attrs.put("updatedAt", List.of(user.getUpdatedAt().toString()));
+            }
+            if (user.getEdminet() != null) {
+                attrs.put("edminet", List.of(Byte.toString(user.getEdminet())));
+            }
+            if (user.getIsNaina() != null) {
+                attrs.put("isNaina", List.of(Byte.toString(user.getIsNaina())));
+            }
+            if (user.getMailingList() != null) {
+                attrs.put("mailingList", List.of(Byte.toString(user.getMailingList())));
+            }
+            if (user.getMailMembership() != null) {
+                attrs.put("mailMembership", List.of(Integer.toString(user.getMailMembership())));
+            }
+            if (user.getDateSignedHosting() != null) {
+                attrs.put("dateSignedHosting", List.of(user.getDateSignedHosting().toString()));
+            }
+            if (user.getDateSignedAdhesion() != null) {
+                attrs.put("dateSignedAdhesion", List.of(user.getDateSignedAdhesion().toString()));
             }
 
             return attrs;
