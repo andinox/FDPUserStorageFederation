@@ -66,9 +66,11 @@ public final class ExternalUserMapper {
 
     private static Set<String> availableColumns(ResultSet rs) throws SQLException {
         ResultSetMetaData meta = rs.getMetaData();
-        return IntStream.rangeClosed(1, meta.getColumnCount())
-                .mapToObj(i -> meta.getColumnLabel(i).toLowerCase())
-                .collect(Collectors.toSet());
+        Set<String> columns = new java.util.HashSet<>();
+        for (int i = 1; i <= meta.getColumnCount(); i++) {
+            columns.add(meta.getColumnLabel(i).toLowerCase());
+        }
+        return columns;
     }
 
     public static ExternalUser map(ResultSet rs) throws SQLException {
