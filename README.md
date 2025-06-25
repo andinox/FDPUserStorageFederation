@@ -25,6 +25,8 @@ A Keycloak 26.2.5 user storage provider bridging external accounts stored in a M
 
 The database schema and seed data are located under [`sql`](sql).
 
+All columns from the `adherents` table are exposed as user attributes when a user is retrieved. For example the `is_naina` column is available as the `isNaina` attribute which can be used to build group mappings if desired.
+
 ## 🧰 Prerequisites
 
 - Java 21
