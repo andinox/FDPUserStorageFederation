@@ -1,9 +1,21 @@
 {
     "attributes": [
         {
+            "name": "username"
+        },
+        {
+            "name": "email"
+        },
+        {
+            "name": "firstName"
+        },
+        {
+            "name": "lastName"
+        },
+        {
             "name": "ldapLogin",
             "displayName": "LDAP login",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -12,7 +24,7 @@
         {
             "name": "general",
             "displayName": "Comments",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -21,7 +33,7 @@
         {
             "name": "departureDate",
             "displayName": "Departure date",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -30,7 +42,7 @@
         {
             "name": "modeAssociation",
             "displayName": "Mode association",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -39,7 +51,7 @@
         {
             "name": "accessToken",
             "displayName": "Access token",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -48,7 +60,7 @@
         {
             "name": "subnet",
             "displayName": "Subnet",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -57,7 +69,7 @@
         {
             "name": "ip",
             "displayName": "IP address",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -66,7 +78,7 @@
         {
             "name": "chambreId",
             "displayName": "Chambre ID",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -75,7 +87,7 @@
         {
             "name": "createdAt",
             "displayName": "Created at (DB)",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -84,7 +96,7 @@
         {
             "name": "updatedAt",
             "displayName": "Updated at (DB)",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -93,7 +105,7 @@
         {
             "name": "edminet",
             "displayName": "Edminet",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -102,7 +114,7 @@
         {
             "name": "isNaina",
             "displayName": "Is Naina",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -111,7 +123,7 @@
         {
             "name": "mailingList",
             "displayName": "Mailing list",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -120,7 +132,7 @@
         {
             "name": "mailMembership",
             "displayName": "Mail membership",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -129,7 +141,7 @@
         {
             "name": "dateSignedHosting",
             "displayName": "Date signed hosting",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -138,7 +150,7 @@
         {
             "name": "dateSignedAdhesion",
             "displayName": "Date signed adhesion",
-            "group": "external",
+            "group": "ADH6",
             "permissions": {
                 "view": ["admin"],
                 "edit": ["admin"]
@@ -147,9 +159,9 @@
     ],
     "groups": [
         {
-            "name": "external",
-            "displayHeader": "External Attributes",
-            "displayDescription": "Attributes from the external database"
+            "name": "ADH6",
+            "displayHeader": "ADH6 Attributes",
+            "displayDescription": "Attributes from the ADH6 database"
         }
     ]
 }
