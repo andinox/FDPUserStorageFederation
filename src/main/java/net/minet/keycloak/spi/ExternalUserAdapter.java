@@ -148,15 +148,38 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         addDefaults();
     }
 
+    private static String camelToSnake(String s) {
+        return s.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
+    }
+
     private void addDefaults() {
         ATTR_GETTERS.forEach((name, fn) -> {
             Object val = fn.apply(user);
             if (val != null) {
                 switch (name) {
-                    case "email" -> setEmail((String) val);
-                    case "firstName" -> setFirstName((String) val);
-                    case "lastName" -> setLastName((String) val);
-                    default -> updateAttribute(name, val);
+                    case "email" -> {
+                        setEmail((String) val);
+                        super.setSingleAttribute(name, (String) val);
+                    }
+                    case "firstName" -> {
+                        setFirstName((String) val);
+                        super.setSingleAttribute(name, (String) val);
+                    }
+                    case "lastName" -> {
+                        setLastName((String) val);
+                        super.setSingleAttribute(name, (String) val);
+                    }
+                    case "createdAt" -> {
+                        setCreatedTimestamp(((java.time.LocalDateTime) val)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toInstant().toEpochMilli());
+                        super.setSingleAttribute(name, val.toString());
+                    }
+                    default -> super.setSingleAttribute(name, val.toString());
+                }
+                String alias = camelToSnake(name);
+                if (!alias.equals(name)) {
+                    super.setSingleAttribute(alias, val.toString());
                 }
             }
         });

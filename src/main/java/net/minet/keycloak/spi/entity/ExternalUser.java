@@ -191,6 +191,7 @@ public class ExternalUser {
         this.ldapLogin = ldapLogin;
     }
 
+
     public LocalDateTime getDateSignedHosting() {
         return dateSignedHosting;
     }
