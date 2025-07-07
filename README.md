@@ -82,7 +82,7 @@ docker compose -f docker-compose.prod.yml up
 
 This repository bundles the [Keywind](https://github.com/lukin/keywind) login theme under `themes/keywind`. Only the templates required for signing in and changing a password are included. Both development and production Compose files mount this directory into Keycloak so you can select the `keywind` theme in the administration console.
 
-An account theme with the same styling is provided in `themes/keywind/account`. Mounting this directory lets Keycloak render the account console with the Minet look and feel.
+An account theme with the same styling is provided in `themes/keywind/account`. Mounting this directory lets Keycloak render the account console with the Minet look and feel. It inherits from the default `keycloak` account theme so only the CSS and JavaScript assets are overridden.
 
 ## 📝 Logging
 
