@@ -57,7 +57,7 @@ public class FdpSQLUserStorageProvider implements
     }
 
     protected UserModel createAdapter(RealmModel realm, ExternalUser user) {
-        return new ExternalUserAdapter(session, realm, model, user);
+        return new ExternalUserAdapter(session, realm, model, user, dataSource);
     }
 
 

@@ -4,6 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.BiConsumer;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Date;
+import org.jboss.logging.Logger;
 
 import net.minet.keycloak.spi.entity.ExternalUser;
 import org.keycloak.component.ComponentModel;
@@ -16,6 +24,52 @@ import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
  */
 public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     private final ExternalUser user;
+    private final DataSource dataSource;
+    private static final Logger logger = Logger.getLogger(ExternalUserAdapter.class);
+
+    private static final Map<String, String> ATTR_COLUMNS = Map.ofEntries(
+            Map.entry("email", "mail"),
+            Map.entry("firstName", "prenom"),
+            Map.entry("lastName", "nom"),
+            Map.entry("ldapLogin", "ldap_login"),
+            Map.entry("general", "commentaires"),
+            Map.entry("departureDate", "date_de_depart"),
+            Map.entry("modeAssociation", "mode_association"),
+            Map.entry("accessToken", "access_token"),
+            Map.entry("subnet", "subnet"),
+            Map.entry("ip", "ip"),
+            Map.entry("chambreId", "chambre_id"),
+            Map.entry("createdAt", "created_at"),
+            Map.entry("updatedAt", "updated_at"),
+            Map.entry("edminet", "edminet"),
+            Map.entry("isNaina", "is_naina"),
+            Map.entry("mailingList", "mailinglist"),
+            Map.entry("mailMembership", "mail_membership"),
+            Map.entry("dateSignedHosting", "datesignedhosting"),
+            Map.entry("dateSignedAdhesion", "datesignedadhesion")
+    );
+
+    private static final Map<String, BiConsumer<ExternalUser, Object>> ATTR_SETTERS = Map.ofEntries(
+            Map.entry("email", (u, v) -> u.setEmail((String) v)),
+            Map.entry("firstName", (u, v) -> u.setFirstName((String) v)),
+            Map.entry("lastName", (u, v) -> u.setLastName((String) v)),
+            Map.entry("ldapLogin", (u, v) -> u.setLdapLogin((String) v)),
+            Map.entry("general", (u, v) -> u.setComments((String) v)),
+            Map.entry("departureDate", (u, v) -> u.setDepartureDate((java.time.LocalDate) v)),
+            Map.entry("modeAssociation", (u, v) -> u.setModeAssociation((Byte) v)),
+            Map.entry("accessToken", (u, v) -> u.setAccessToken((String) v)),
+            Map.entry("subnet", (u, v) -> u.setSubnet((String) v)),
+            Map.entry("ip", (u, v) -> u.setIp((String) v)),
+            Map.entry("chambreId", (u, v) -> u.setChambreId((Integer) v)),
+            Map.entry("createdAt", (u, v) -> u.setCreatedAt((java.time.LocalDateTime) v)),
+            Map.entry("updatedAt", (u, v) -> u.setUpdatedAt((java.time.LocalDateTime) v)),
+            Map.entry("edminet", (u, v) -> u.setEdminet((Byte) v)),
+            Map.entry("isNaina", (u, v) -> u.setIsNaina((Byte) v)),
+            Map.entry("mailingList", (u, v) -> u.setMailingList((Byte) v)),
+            Map.entry("mailMembership", (u, v) -> u.setMailMembership((Integer) v)),
+            Map.entry("dateSignedHosting", (u, v) -> u.setDateSignedHosting((java.time.LocalDateTime) v)),
+            Map.entry("dateSignedAdhesion", (u, v) -> u.setDateSignedAdhesion((java.time.LocalDateTime) v))
+    );
 
     private static final Map<String, Function<ExternalUser, Object>> ATTR_GETTERS = Map.ofEntries(
             Map.entry("email", ExternalUser::getEmail),
@@ -43,13 +97,53 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         return fn.apply(u);
     }
 
-    private static void set(ExternalUser u, java.util.function.BiConsumer<ExternalUser, String> fn, String v) {
+    private static void set(ExternalUser u, BiConsumer<ExternalUser, Object> fn, Object v) {
         fn.accept(u, v);
     }
 
-    public ExternalUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, ExternalUser user) {
+    private static Object parseValue(String name, String value) {
+        if (value == null) return null;
+        return switch (name) {
+            case "departureDate" -> java.time.LocalDate.parse(value);
+            case "modeAssociation", "edminet", "isNaina", "mailingList" -> Byte.valueOf(value);
+            case "chambreId", "mailMembership" -> Integer.valueOf(value);
+            case "createdAt", "updatedAt", "dateSignedHosting", "dateSignedAdhesion" -> java.time.LocalDateTime.parse(value);
+            default -> value;
+        };
+    }
+
+    private void updateColumn(String column, Object value) {
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE adherents SET " + column + "=? WHERE id=?")) {
+            if (value instanceof java.time.LocalDate ld) {
+                ps.setDate(1, Date.valueOf(ld));
+            } else if (value instanceof java.time.LocalDateTime ldt) {
+                ps.setTimestamp(1, Timestamp.valueOf(ldt));
+            } else {
+                ps.setObject(1, value);
+            }
+            ps.setInt(2, user.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            logger.warn("Failed to update column " + column + " for user " + user.getId() + ": " + e.getMessage());
+        }
+    }
+
+    private void updateAttribute(String name, Object value) {
+        BiConsumer<ExternalUser, Object> setter = ATTR_SETTERS.get(name);
+        String column = ATTR_COLUMNS.get(name);
+        if (setter != null && column != null) {
+            set(user, setter, value);
+            updateColumn(column, value);
+        } else {
+            super.setSingleAttribute(name, value == null ? null : value.toString());
+        }
+    }
+
+    public ExternalUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, ExternalUser user, DataSource dataSource) {
         super(session, realm, model);
         this.user = user;
+        this.dataSource = dataSource;
         this.storageId = new org.keycloak.storage.StorageId(model.getId(), String.valueOf(user.getId()));
         addDefaults();
     }
@@ -67,7 +161,8 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     @Override
     public void setUsername(String username) {
-        set(user, ExternalUser::setUsername, username);
+        set(user, (u,v) -> u.setUsername((String)v), username);
+        updateColumn("login", username);
     }
 
     @Override
@@ -77,7 +172,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     @Override
     public void setEmail(String email) {
-        set(user, ExternalUser::setEmail, email);
+        updateAttribute("email", email);
     }
 
     @Override
@@ -87,7 +182,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     @Override
     public void setFirstName(String firstName) {
-        set(user, ExternalUser::setFirstName, firstName);
+        updateAttribute("firstName", firstName);
     }
 
     @Override
@@ -97,7 +192,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     @Override
     public void setLastName(String lastName) {
-        set(user, ExternalUser::setLastName, lastName);
+        updateAttribute("lastName", lastName);
     }
 
     @Override
@@ -131,20 +226,13 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     @Override
     public void setSingleAttribute(String name, String value) {
-        switch (name) {
-            case "ldapLogin" -> user.setLdapLogin(value);
-            case "general" -> user.setComments(value);
-            default -> super.setSingleAttribute(name, value);
-        }
+        Object val = parseValue(name, value);
+        updateAttribute(name, val);
     }
 
     @Override
     public void removeAttribute(String name) {
-        switch (name) {
-            case "ldapLogin" -> user.setLdapLogin(null);
-            case "general" -> user.setComments(null);
-            default -> super.removeAttribute(name);
-        }
+        updateAttribute(name, null);
     }
 
     @Override
