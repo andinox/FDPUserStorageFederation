@@ -153,16 +153,25 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
             Object val = fn.apply(user);
             if (val != null) {
                 switch (name) {
-                    case "email" -> setEmail((String) val);
-                    case "firstName" -> setFirstName((String) val);
-                    case "lastName" -> setLastName((String) val);
+                    case "email" -> {
+                        setEmail((String) val);
+                        super.setSingleAttribute(name, (String) val);
+                    }
+                    case "firstName" -> {
+                        setFirstName((String) val);
+                        super.setSingleAttribute(name, (String) val);
+                    }
+                    case "lastName" -> {
+                        setLastName((String) val);
+                        super.setSingleAttribute(name, (String) val);
+                    }
                     case "createdAt" -> {
                         setCreatedTimestamp(((java.time.LocalDateTime) val)
                                 .atZone(java.time.ZoneId.systemDefault())
                                 .toInstant().toEpochMilli());
-                        updateAttribute(name, val);
+                        super.setSingleAttribute(name, val.toString());
                     }
-                    default -> updateAttribute(name, val);
+                    default -> super.setSingleAttribute(name, val.toString());
                 }
             }
         });
