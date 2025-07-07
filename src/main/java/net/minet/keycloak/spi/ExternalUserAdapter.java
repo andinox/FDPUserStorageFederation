@@ -181,6 +181,12 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
                 if (!alias.equals(name)) {
                     super.setSingleAttribute(alias, val.toString());
                 }
+                String columnAlias = ATTR_COLUMNS.get(name);
+                if (columnAlias != null &&
+                        !columnAlias.equals(name) &&
+                        !columnAlias.equals(alias)) {
+                    super.setSingleAttribute(columnAlias, val.toString());
+                }
             }
         });
     }

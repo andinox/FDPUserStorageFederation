@@ -27,6 +27,10 @@ The database schema and seed data are located under [`sql`](sql).
 
 All columns from the `adherents` table are exposed as user attributes when a user is retrieved. These values appear in the **Attributes** tab of the administration console without persisting anything back to the database. For example the `is_naina` column becomes the `isNaina` attribute (with a `is_naina` alias) and `created_at` is shown as both the built‑in created timestamp and a custom attribute. You can map any of these attributes to groups or roles as needed.
 
+The bundled `user-profile.json` groups these attributes under **ADH6**. Built‑in
+fields such as first and last name are duplicated as the `prenom` and `nom`
+attributes so they show up with the other values in the Attributes tab.
+
 ## 🧰 Prerequisites
 
 - Java 21
