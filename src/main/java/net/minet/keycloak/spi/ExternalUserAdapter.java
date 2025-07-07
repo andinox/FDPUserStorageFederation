@@ -149,9 +149,17 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     private void addDefaults() {
-        if (user.getEmail() != null) setEmail(user.getEmail());
-        if (user.getFirstName() != null) setFirstName(user.getFirstName());
-        if (user.getLastName() != null) setLastName(user.getLastName());
+        ATTR_GETTERS.forEach((name, fn) -> {
+            Object val = fn.apply(user);
+            if (val != null) {
+                switch (name) {
+                    case "email" -> setEmail((String) val);
+                    case "firstName" -> setFirstName((String) val);
+                    case "lastName" -> setLastName((String) val);
+                    default -> updateAttribute(name, val);
+                }
+            }
+        });
     }
 
     @Override
