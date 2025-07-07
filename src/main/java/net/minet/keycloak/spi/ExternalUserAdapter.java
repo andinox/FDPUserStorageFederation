@@ -148,6 +148,10 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         addDefaults();
     }
 
+    private static String camelToSnake(String s) {
+        return s.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
+    }
+
     private void addDefaults() {
         ATTR_GETTERS.forEach((name, fn) -> {
             Object val = fn.apply(user);
@@ -172,6 +176,10 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
                         super.setSingleAttribute(name, val.toString());
                     }
                     default -> super.setSingleAttribute(name, val.toString());
+                }
+                String alias = camelToSnake(name);
+                if (!alias.equals(name)) {
+                    super.setSingleAttribute(alias, val.toString());
                 }
             }
         });
