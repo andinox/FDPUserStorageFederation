@@ -25,7 +25,7 @@ A Keycloak 26.2.5 user storage provider bridging external accounts stored in a M
 
 The database schema and seed data are located under [`sql`](sql).
 
-All columns from the `adherents` table are exposed as user attributes when a user is retrieved. For example the `is_naina` column is available as the `isNaina` attribute which can be used to build group mappings if desired.
+All columns from the `adherents` table are exposed as user attributes when a user is retrieved. These values appear in the **Attributes** tab of the administration console without persisting anything back to the database. For example the `is_naina` column becomes the `isNaina` attribute and `created_at` is shown as both the built‑in created timestamp and a custom attribute. You can map any of these attributes to groups or roles as needed.
 
 ## 🧰 Prerequisites
 
