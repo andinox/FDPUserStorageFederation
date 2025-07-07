@@ -14,11 +14,13 @@ services:
       QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
       QUARKUS_DATASOURCE_FEDERATION_JDBC_DRIVER: org.mariadb.jdbc.MariaDbDataSource
       QUARKUS_DATASOURCE_FEDERATION_JDBC_TRANSACTIONS: xa
+      KC_SPI_USER_PROFILE_DECLARATIVE_USER_PROFILE_CONFIG_FILE: /opt/keycloak/conf/user-profile.json
     command: start
     volumes:
       - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation.jar
       - ./src/main/resources/application.properties:/opt/keycloak/conf/application.properties:ro
       - ./themes/keywind:/opt/keycloak/themes/keywind:ro
+      - ./conf/user-profile.json:/opt/keycloak/conf/user-profile.json:ro
     depends_on:
       - mariadb
       - postgres

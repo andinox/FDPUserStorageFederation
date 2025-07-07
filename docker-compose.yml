@@ -1,1 +1,49 @@
-
+version: '3.8'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.5
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: secret
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_URL: jdbc:mariadb://mariadb:3306/adh6_prod
+      QUARKUS_DATASOURCE_FEDERATION_USERNAME: keycloak
+      QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_DRIVER: org.mariadb.jdbc.MariaDbDataSource
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_TRANSACTIONS: xa
+      KC_SPI_USER_PROFILE_DECLARATIVE_USER_PROFILE_CONFIG_FILE: /opt/keycloak/conf/user-profile.json
+    command: start-dev
+    volumes:
+      - ./target/UserStorageFederation-0.0.1.jar:/opt/keycloak/providers/UserStorageFederation.jar
+      - ./src/main/resources/application.properties:/opt/keycloak/conf/application.properties:ro
+      - ./themes/keywind:/opt/keycloak/themes/keywind:ro
+      - ./conf/user-profile.json:/opt/keycloak/conf/user-profile.json:ro
+    depends_on:
+      - mariadb
+      - postgres
+    ports:
+      - "8080:8080"
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: adh6_prod
+      MARIADB_USER: keycloak
+      MARIADB_PASSWORD: password
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d:ro
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  mariadb_data:
+  postgres_data:
