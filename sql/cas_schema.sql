@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS adherents (
     mailinglist TINYINT,
     mail_membership INT,
     ldap_login VARCHAR(255),
+    ldap_name VARCHAR(255),
     datesignedhosting DATETIME,
     datesignedadhesion DATETIME
 );

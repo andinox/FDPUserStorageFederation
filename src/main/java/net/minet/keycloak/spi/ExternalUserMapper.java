@@ -54,6 +54,7 @@ public final class ExternalUserMapper {
             new ColumnMapping("mailinglist", (u, rs) -> u.setMailingList(rs.getByte("mailinglist"))),
             new ColumnMapping("mail_membership", (u, rs) -> u.setMailMembership(rs.getInt("mail_membership"))),
             new ColumnMapping("ldap_login", (u, rs) -> u.setLdapLogin(rs.getString("ldap_login"))),
+            new ColumnMapping("ldap_name", (u, rs) -> u.setLdapName(rs.getString("ldap_name"))),
             new ColumnMapping("datesignedhosting", (u, rs) -> {
                 Timestamp ts = rs.getTimestamp("datesignedhosting");
                 if (ts != null) u.setDateSignedHosting(ts.toLocalDateTime());

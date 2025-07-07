@@ -28,6 +28,7 @@ public class ExternalUser {
     private Byte mailingList;
     private Integer mailMembership;
     private String ldapLogin;
+    private String ldapName;
     private LocalDateTime dateSignedHosting;
     private LocalDateTime dateSignedAdhesion;
 
@@ -189,6 +190,14 @@ public class ExternalUser {
 
     public void setLdapLogin(String ldapLogin) {
         this.ldapLogin = ldapLogin;
+    }
+
+    public String getLdapName() {
+        return ldapName;
+    }
+
+    public void setLdapName(String ldapName) {
+        this.ldapName = ldapName;
     }
 
     public LocalDateTime getDateSignedHosting() {
