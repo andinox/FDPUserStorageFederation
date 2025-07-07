@@ -1,0 +1,155 @@
+{
+    "attributes": [
+        {
+            "name": "ldapLogin",
+            "displayName": "LDAP login",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "general",
+            "displayName": "Comments",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "departureDate",
+            "displayName": "Departure date",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "modeAssociation",
+            "displayName": "Mode association",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "accessToken",
+            "displayName": "Access token",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "subnet",
+            "displayName": "Subnet",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "ip",
+            "displayName": "IP address",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "chambreId",
+            "displayName": "Chambre ID",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "createdAt",
+            "displayName": "Created at (DB)",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "updatedAt",
+            "displayName": "Updated at (DB)",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "edminet",
+            "displayName": "Edminet",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "isNaina",
+            "displayName": "Is Naina",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "mailingList",
+            "displayName": "Mailing list",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "mailMembership",
+            "displayName": "Mail membership",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "dateSignedHosting",
+            "displayName": "Date signed hosting",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "dateSignedAdhesion",
+            "displayName": "Date signed adhesion",
+            "group": "external",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        }
+    ],
+    "groups": [
+        {
+            "name": "external",
+            "displayHeader": "External Attributes",
+            "displayDescription": "Attributes from the external database"
+        }
+    ]
+}
