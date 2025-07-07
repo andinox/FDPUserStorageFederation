@@ -43,8 +43,8 @@ public class FdpSQLUserStorageProvider implements
             "id", "nom", "prenom", "mail", "login", "password", "date_de_depart",
             "commentaires", "mode_association", "access_token", "subnet", "ip",
             "chambre_id", "created_at", "updated_at", "edminet", "is_naina",
-            "mailinglist", "mail_membership", "ldap_login", "datesignedhosting",
-            "datesignedadhesion");
+            "mailinglist", "mail_membership", "ldap_login",
+            "datesignedhosting", "datesignedadhesion");
 
     protected KeycloakSession session;
     protected DataSource dataSource;
