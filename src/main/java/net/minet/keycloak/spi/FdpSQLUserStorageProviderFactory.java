@@ -1,6 +1,6 @@
 package net.minet.keycloak.spi;
 
-import org.mariadb.jdbc.MariaDbXADataSource;
+import org.mariadb.jdbc.MariaDbDataSource;
 import javax.sql.DataSource;
 import org.keycloak.Config;
 import org.keycloak.component.ComponentModel;
@@ -19,7 +19,7 @@ public class FdpSQLUserStorageProviderFactory implements UserStorageProviderFact
     @Override
     public void init(Config.Scope config) {
         try {
-            MariaDbXADataSource ds = new MariaDbXADataSource();
+            MariaDbDataSource ds = new MariaDbDataSource();
             ds.setUrl(System.getProperty("quarkus.datasource.federation.jdbc.url",
                     System.getenv("QUARKUS_DATASOURCE_FEDERATION_JDBC_URL")));
             ds.setUser(System.getProperty("quarkus.datasource.federation.username",

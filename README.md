@@ -68,7 +68,7 @@ Keycloak exposes port `8080` and connects to PostgreSQL for its internal data an
       QUARKUS_DATASOURCE_FEDERATION_JDBC_URL: jdbc:mariadb://mariadb:3306/adh6_prod
       QUARKUS_DATASOURCE_FEDERATION_USERNAME: keycloak
       QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
-      QUARKUS_DATASOURCE_FEDERATION_JDBC_DRIVER: org.mariadb.jdbc.MariaDbXADataSource
+      QUARKUS_DATASOURCE_FEDERATION_JDBC_DRIVER: org.mariadb.jdbc.MariaDbDataSource
       QUARKUS_DATASOURCE_FEDERATION_JDBC_TRANSACTIONS: xa
 ```
 
