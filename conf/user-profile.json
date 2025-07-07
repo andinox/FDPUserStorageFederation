@@ -7,10 +7,32 @@
             "name": "email"
         },
         {
-            "name": "firstName"
+            "name": "firstName",
+            "displayName": "First name",
+            "group": "ADH6"
         },
         {
-            "name": "lastName"
+            "name": "lastName",
+            "displayName": "Last name",
+            "group": "ADH6"
+        },
+        {
+            "name": "prenom",
+            "displayName": "First name",
+            "group": "ADH6",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
+        },
+        {
+            "name": "nom",
+            "displayName": "Last name",
+            "group": "ADH6",
+            "permissions": {
+                "view": ["admin"],
+                "edit": ["admin"]
+            }
         },
         {
             "name": "ldapLogin",
