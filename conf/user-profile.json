@@ -1,189 +1,117 @@
 {
-    "attributes": [
-        {
-            "name": "username"
-        },
-        {
-            "name": "email"
-        },
-        {
-            "name": "firstName",
-            "displayName": "First name",
-            "group": "ADH6"
-        },
-        {
-            "name": "lastName",
-            "displayName": "Last name",
-            "group": "ADH6"
-        },
-        {
-            "name": "prenom",
-            "displayName": "First name",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "nom",
-            "displayName": "Last name",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "ldapLogin",
-            "displayName": "LDAP login",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "general",
-            "displayName": "Comments",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "departureDate",
-            "displayName": "Departure date",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "modeAssociation",
-            "displayName": "Mode association",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "accessToken",
-            "displayName": "Access token",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "subnet",
-            "displayName": "Subnet",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "ip",
-            "displayName": "IP address",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "chambreId",
-            "displayName": "Chambre ID",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "createdAt",
-            "displayName": "Created at (DB)",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "updatedAt",
-            "displayName": "Updated at (DB)",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "edminet",
-            "displayName": "Edminet",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "isNaina",
-            "displayName": "Is Naina",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "mailingList",
-            "displayName": "Mailing list",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "mailMembership",
-            "displayName": "Mail membership",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "dateSignedHosting",
-            "displayName": "Date signed hosting",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        },
-        {
-            "name": "dateSignedAdhesion",
-            "displayName": "Date signed adhesion",
-            "group": "ADH6",
-            "permissions": {
-                "view": ["admin"],
-                "edit": ["admin"]
-            }
-        }
-    ],
-    "groups": [
-        {
-            "name": "ADH6",
-            "displayHeader": "ADH6 Attributes",
-            "displayDescription": "Attributes from the ADH6 database"
-        }
-    ]
+  "attributes": [
+    {
+      "name": "username"
+    },
+    {
+      "name": "email"
+    },
+    {
+      "name": "firstName",
+      "displayName": "First name",
+      "group": "ADH6"
+    },
+    {
+      "name": "lastName",
+      "displayName": "Last name",
+      "group": "ADH6"
+    },
+    {
+      "name": "prenom",
+      "displayName": "First name",
+      "group": "ADH6"
+    },
+    {
+      "name": "nom",
+      "displayName": "Last name",
+      "group": "ADH6"
+    },
+    {
+      "name": "ldapLogin",
+      "displayName": "LDAP login",
+      "group": "ADH6"
+    },
+    {
+      "name": "general",
+      "displayName": "Comments",
+      "group": "ADH6"
+    },
+    {
+      "name": "departureDate",
+      "displayName": "Departure date",
+      "group": "ADH6"
+    },
+    {
+      "name": "modeAssociation",
+      "displayName": "Mode association",
+      "group": "ADH6"
+    },
+    {
+      "name": "accessToken",
+      "displayName": "Access token",
+      "group": "ADH6"
+    },
+    {
+      "name": "subnet",
+      "displayName": "Subnet",
+      "group": "ADH6"
+    },
+    {
+      "name": "ip",
+      "displayName": "IP address",
+      "group": "ADH6"
+    },
+    {
+      "name": "chambreId",
+      "displayName": "Chambre ID",
+      "group": "ADH6"
+    },
+    {
+      "name": "createdAt",
+      "displayName": "Created at (DB)",
+      "group": "ADH6"
+    },
+    {
+      "name": "updatedAt",
+      "displayName": "Updated at (DB)",
+      "group": "ADH6"
+    },
+    {
+      "name": "edminet",
+      "displayName": "Edminet",
+      "group": "ADH6"
+    },
+    {
+      "name": "isNaina",
+      "displayName": "Is Naina",
+      "group": "ADH6"
+    },
+    {
+      "name": "mailingList",
+      "displayName": "Mailing list",
+      "group": "ADH6"
+    },
+    {
+      "name": "mailMembership",
+      "displayName": "Mail membership",
+      "group": "ADH6"
+    },
+    {
+      "name": "dateSignedHosting",
+      "displayName": "Date signed hosting",
+      "group": "ADH6"
+    },
+    {
+      "name": "dateSignedAdhesion",
+      "displayName": "Date signed adhesion",
+      "group": "ADH6"
+    }
+  ],
+  "groups": [
+    {
+      "name": "ADH6",
+      "displayHeader": "ADH6 Attributes",
+      "displayDescription": "Attributes from the ADH6 database"
+    }
+  ]
 }
