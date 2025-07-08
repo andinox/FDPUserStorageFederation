@@ -24,8 +24,18 @@ public final class ExternalUserMapper {
 
     private record ColumnMapping(String column, ColumnSetter setter) {}
 
+    private static Integer nullableInt(ResultSet rs, String column) throws SQLException {
+        Object o = rs.getObject(column);
+        return o == null ? null : ((Number) o).intValue();
+    }
+
+    private static Byte nullableByte(ResultSet rs, String column) throws SQLException {
+        Object o = rs.getObject(column);
+        return o == null ? null : ((Number) o).byteValue();
+    }
+
     private static final List<ColumnMapping> MAPPINGS = List.of(
-            new ColumnMapping("id", (u, rs) -> u.setId(rs.getInt("id"))),
+            new ColumnMapping("id", (u, rs) -> u.setId(nullableInt(rs, "id"))),
             new ColumnMapping("nom", (u, rs) -> u.setLastName(rs.getString("nom"))),
             new ColumnMapping("prenom", (u, rs) -> u.setFirstName(rs.getString("prenom"))),
             new ColumnMapping("mail", (u, rs) -> u.setEmail(rs.getString("mail"))),
@@ -36,11 +46,11 @@ public final class ExternalUserMapper {
                 if (dd != null) u.setDepartureDate(dd.toLocalDate());
             }),
             new ColumnMapping("commentaires", (u, rs) -> u.setComments(rs.getString("commentaires"))),
-            new ColumnMapping("mode_association", (u, rs) -> u.setModeAssociation(rs.getByte("mode_association"))),
+            new ColumnMapping("mode_association", (u, rs) -> u.setModeAssociation(nullableByte(rs, "mode_association"))),
             new ColumnMapping("access_token", (u, rs) -> u.setAccessToken(rs.getString("access_token"))),
             new ColumnMapping("subnet", (u, rs) -> u.setSubnet(rs.getString("subnet"))),
             new ColumnMapping("ip", (u, rs) -> u.setIp(rs.getString("ip"))),
-            new ColumnMapping("chambre_id", (u, rs) -> u.setChambreId(rs.getInt("chambre_id"))),
+            new ColumnMapping("chambre_id", (u, rs) -> u.setChambreId(nullableInt(rs, "chambre_id"))),
             new ColumnMapping("created_at", (u, rs) -> {
                 Timestamp ts = rs.getTimestamp("created_at");
                 if (ts != null) u.setCreatedAt(ts.toLocalDateTime());
@@ -49,10 +59,10 @@ public final class ExternalUserMapper {
                 Timestamp ts = rs.getTimestamp("updated_at");
                 if (ts != null) u.setUpdatedAt(ts.toLocalDateTime());
             }),
-            new ColumnMapping("edminet", (u, rs) -> u.setEdminet(rs.getByte("edminet"))),
-            new ColumnMapping("is_naina", (u, rs) -> u.setIsNaina(rs.getByte("is_naina"))),
-            new ColumnMapping("mailinglist", (u, rs) -> u.setMailingList(rs.getByte("mailinglist"))),
-            new ColumnMapping("mail_membership", (u, rs) -> u.setMailMembership(rs.getInt("mail_membership"))),
+            new ColumnMapping("edminet", (u, rs) -> u.setEdminet(nullableByte(rs, "edminet"))),
+            new ColumnMapping("is_naina", (u, rs) -> u.setIsNaina(nullableByte(rs, "is_naina"))),
+            new ColumnMapping("mailinglist", (u, rs) -> u.setMailingList(nullableByte(rs, "mailinglist"))),
+            new ColumnMapping("mail_membership", (u, rs) -> u.setMailMembership(nullableInt(rs, "mail_membership"))),
             new ColumnMapping("ldap_login", (u, rs) -> u.setLdapLogin(rs.getString("ldap_login"))),
             new ColumnMapping("datesignedhosting", (u, rs) -> {
                 Timestamp ts = rs.getTimestamp("datesignedhosting");
