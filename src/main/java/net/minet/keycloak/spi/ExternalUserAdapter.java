@@ -113,6 +113,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     private void updateColumn(String column, Object value) {
+        logger.debugf("updateColumn %s=%s", column, value);
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement("UPDATE adherents SET " + column + "=? WHERE id=?")) {
             if (value instanceof java.time.LocalDate ld) {
@@ -129,12 +130,31 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         }
     }
 
+    /**
+     * Update an attribute both in the wrapped {@link ExternalUser} and in the
+     * federated storage. Mapped columns are persisted to the external database
+     * and all alias keys (camelCase, snake_case and column name) are kept in
+     * sync.
+     */
     private void updateAttribute(String name, Object value) {
+        logger.debugf("updateAttribute %s=%s", name, value);
         BiConsumer<ExternalUser, Object> setter = ATTR_SETTERS.get(name);
         String column = ATTR_COLUMNS.get(name);
         if (setter != null && column != null) {
             set(user, setter, value);
             updateColumn(column, value);
+            String str = value == null ? null : value.toString();
+            super.setSingleAttribute(name, str);
+            logger.debugf(" -> %s=%s", name, str);
+            String alias = camelToSnake(name);
+            if (!alias.equals(name)) {
+                super.setSingleAttribute(alias, str);
+                logger.debugf(" -> %s=%s", alias, str);
+            }
+            if (!column.equals(name) && !column.equals(alias)) {
+                super.setSingleAttribute(column, str);
+                logger.debugf(" -> %s=%s", column, str);
+            }
         } else {
             super.setSingleAttribute(name, value == null ? null : value.toString());
         }
@@ -152,40 +172,56 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         return s.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
     }
 
+    /**
+     * Populate this adapter's attribute map from the wrapped {@link ExternalUser}.
+     * <p>
+     * Built-in fields such as first name and last name are assigned via their
+     * dedicated setters and also stored as attributes under multiple aliases
+     * (e.g. {@code firstName}, {@code first_name}, and the database column name
+     * {@code prenom}). Other columns are only exposed as attributes without
+     * calling specialised setters.
+     */
     private void addDefaults() {
         ATTR_GETTERS.forEach((name, fn) -> {
             Object val = fn.apply(user);
             if (val != null) {
+                logger.debugf("addDefaults %s=%s", name, val);
                 switch (name) {
                     case "email" -> {
                         setEmail((String) val);
                         super.setSingleAttribute(name, (String) val);
+                        logger.debugf(" -> %s=%s", name, val);
                     }
                     case "firstName" -> {
                         setFirstName((String) val);
                         super.setSingleAttribute(name, (String) val);
+                        logger.debugf(" -> %s=%s", name, val);
                     }
                     case "lastName" -> {
                         setLastName((String) val);
                         super.setSingleAttribute(name, (String) val);
+                        logger.debugf(" -> %s=%s", name, val);
                     }
                     case "createdAt" -> {
                         setCreatedTimestamp(((java.time.LocalDateTime) val)
                                 .atZone(java.time.ZoneId.systemDefault())
                                 .toInstant().toEpochMilli());
                         super.setSingleAttribute(name, val.toString());
+                        logger.debugf(" -> %s=%s", name, val);
                     }
                     default -> super.setSingleAttribute(name, val.toString());
                 }
                 String alias = camelToSnake(name);
                 if (!alias.equals(name)) {
                     super.setSingleAttribute(alias, val.toString());
+                    logger.debugf(" -> %s=%s", alias, val);
                 }
                 String columnAlias = ATTR_COLUMNS.get(name);
                 if (columnAlias != null &&
                         !columnAlias.equals(name) &&
                         !columnAlias.equals(alias)) {
                     super.setSingleAttribute(columnAlias, val.toString());
+                    logger.debugf(" -> %s=%s", columnAlias, val);
                 }
             }
         });
