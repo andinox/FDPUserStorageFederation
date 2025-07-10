@@ -323,13 +323,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     @Override
     public void setSingleAttribute(String name, String value) {
         if ("createdAt".equals(name) || "created_at".equals(name)) {
-            Object val = parseValue("createdAt", value);
-            java.time.LocalDateTime ldt = (java.time.LocalDateTime) val;
-            Long ts = null;
-            if (ldt != null) {
-                ts = ldt.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
-            }
-            setCreatedTimestamp(ts);
+            setCreatedTimestamp(value);
         } else {
             Object val = parseValue(name, value);
             updateAttribute(name, val);
