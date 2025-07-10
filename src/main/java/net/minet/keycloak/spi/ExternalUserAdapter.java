@@ -102,14 +102,21 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     private static Object parseValue(String name, String value) {
-        if (value == null) return null;
-        return switch (name) {
-            case "departureDate" -> java.time.LocalDate.parse(value);
-            case "modeAssociation", "edminet", "isNaina", "mailingList" -> Byte.valueOf(value);
-            case "chambreId", "mailMembership" -> Integer.valueOf(value);
-            case "createdAt", "updatedAt", "dateSignedHosting", "dateSignedAdhesion" -> java.time.LocalDateTime.parse(value);
-            default -> value;
-        };
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return switch (name) {
+                case "departureDate" -> java.time.LocalDate.parse(value);
+                case "modeAssociation", "edminet", "isNaina", "mailingList" -> Byte.valueOf(value);
+                case "chambreId", "mailMembership" -> Integer.valueOf(value);
+                case "createdAt", "updatedAt", "dateSignedHosting", "dateSignedAdhesion" -> java.time.LocalDateTime.parse(value);
+                default -> value;
+            };
+        } catch (java.time.format.DateTimeParseException | NumberFormatException e) {
+            logger.warnf("Failed to parse value for %s: %s", name, value);
+            return null;
+        }
     }
 
     private void updateColumn(String column, Object value) {
