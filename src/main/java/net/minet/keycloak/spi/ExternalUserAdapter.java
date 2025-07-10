@@ -286,12 +286,12 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     @Override
     public void setCreatedTimestamp(Long timestamp) {
+        java.time.LocalDateTime ldt = null;
         if (timestamp != null) {
             java.time.Instant i = java.time.Instant.ofEpochMilli(timestamp);
-            user.setCreatedAt(java.time.LocalDateTime.ofInstant(i, java.time.ZoneId.systemDefault()));
-        } else {
-            user.setCreatedAt(null);
+            ldt = java.time.LocalDateTime.ofInstant(i, java.time.ZoneId.systemDefault());
         }
+        updateAttribute("createdAt", ldt);
         super.setCreatedTimestamp(timestamp);
     }
 
@@ -306,8 +306,18 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     @Override
     public void setSingleAttribute(String name, String value) {
-        Object val = parseValue(name, value);
-        updateAttribute(name, val);
+        if ("createdAt".equals(name) || "created_at".equals(name)) {
+            Object val = parseValue("createdAt", value);
+            java.time.LocalDateTime ldt = (java.time.LocalDateTime) val;
+            Long ts = null;
+            if (ldt != null) {
+                ts = ldt.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+            }
+            setCreatedTimestamp(ts);
+        } else {
+            Object val = parseValue(name, value);
+            updateAttribute(name, val);
+        }
     }
 
     @Override
