@@ -295,6 +295,22 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         super.setCreatedTimestamp(timestamp);
     }
 
+    /**
+     * Convenience method to set the created timestamp from an ISO-8601
+     * {@link String} representation.
+     *
+     * @param timestamp creation date as a string, e.g. "2025-01-02T10:00"
+     */
+    public void setCreatedTimestamp(String timestamp) {
+        Object val = parseValue("createdAt", timestamp);
+        java.time.LocalDateTime ldt = (java.time.LocalDateTime) val;
+        Long ts = null;
+        if (ldt != null) {
+            ts = ldt.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+        setCreatedTimestamp(ts);
+    }
+
     @Override
     public java.util.stream.Stream<String> getAttributeStream(String name) {
         Map<String, List<String>> all = getAttributes();
