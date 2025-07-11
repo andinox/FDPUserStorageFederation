@@ -3,6 +3,7 @@ package net.minet.keycloak.spi;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.BiConsumer;
 import javax.sql.DataSource;
@@ -93,6 +94,10 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
             Map.entry("dateSignedAdhesion", u -> u.getDateSignedAdhesion())
     );
 
+    private static final Set<String> DATETIME_ATTRS = Set.of(
+            "createdAt", "updatedAt", "dateSignedHosting", "dateSignedAdhesion"
+    );
+
     private static <T> T get(ExternalUser u, Function<ExternalUser, T> fn) {
         return fn.apply(u);
     }
@@ -110,7 +115,16 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
                 case "departureDate" -> java.time.LocalDate.parse(value);
                 case "modeAssociation", "edminet", "isNaina", "mailingList" -> Byte.valueOf(value);
                 case "chambreId", "mailMembership" -> Integer.valueOf(value);
-                case "createdAt", "updatedAt", "dateSignedHosting", "dateSignedAdhesion" -> java.time.LocalDateTime.parse(value);
+                case "createdAt", "updatedAt", "dateSignedHosting", "dateSignedAdhesion" -> {
+                    // Accept epoch milliseconds as well as ISO-8601 strings
+                    if (value.matches("-?\\d+")) {
+                        long ms = Long.parseLong(value);
+                        yield java.time.LocalDateTime.ofInstant(
+                                java.time.Instant.ofEpochMilli(ms),
+                                java.time.ZoneOffset.UTC);
+                    }
+                    yield java.time.LocalDateTime.parse(value);
+                }
                 default -> value;
             };
         } catch (java.time.format.DateTimeParseException | NumberFormatException e) {
@@ -150,7 +164,13 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         if (setter != null && column != null) {
             set(user, setter, value);
             updateColumn(column, value);
-            String str = value == null ? null : value.toString();
+            String str;
+            if (value instanceof java.time.LocalDateTime ldt && DATETIME_ATTRS.contains(name)) {
+                long ms = ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
+                str = String.valueOf(ms);
+            } else {
+                str = value == null ? null : value.toString();
+            }
             super.setSingleAttribute(name, str);
             logger.debugf(" -> %s=%s", name, str);
             String alias = camelToSnake(name);
@@ -193,42 +213,48 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
             Object val = fn.apply(user);
             if (val != null) {
                 logger.debugf("addDefaults %s=%s", name, val);
+                String str;
                 switch (name) {
                     case "email" -> {
                         setEmail((String) val);
-                        super.setSingleAttribute(name, (String) val);
-                        logger.debugf(" -> %s=%s", name, val);
+                        str = (String) val;
                     }
                     case "firstName" -> {
                         setFirstName((String) val);
-                        super.setSingleAttribute(name, (String) val);
-                        logger.debugf(" -> %s=%s", name, val);
+                        str = (String) val;
                     }
                     case "lastName" -> {
                         setLastName((String) val);
-                        super.setSingleAttribute(name, (String) val);
-                        logger.debugf(" -> %s=%s", name, val);
+                        str = (String) val;
                     }
                     case "createdAt" -> {
-                        setCreatedTimestamp(((java.time.LocalDateTime) val)
-                                .atZone(java.time.ZoneId.systemDefault())
-                                .toInstant().toEpochMilli());
-                        super.setSingleAttribute(name, val.toString());
-                        logger.debugf(" -> %s=%s", name, val);
+                        long ms = ((java.time.LocalDateTime) val)
+                                .atZone(java.time.ZoneOffset.UTC)
+                                .toInstant().toEpochMilli();
+                        setCreatedTimestamp(ms);
+                        str = String.valueOf(ms);
                     }
-                    default -> super.setSingleAttribute(name, val.toString());
+                    case "updatedAt", "dateSignedHosting", "dateSignedAdhesion" -> {
+                        long ms = ((java.time.LocalDateTime) val)
+                                .atZone(java.time.ZoneOffset.UTC)
+                                .toInstant().toEpochMilli();
+                        str = String.valueOf(ms);
+                    }
+                    default -> str = val.toString();
                 }
+                super.setSingleAttribute(name, str);
+                logger.debugf(" -> %s=%s", name, str);
                 String alias = camelToSnake(name);
                 if (!alias.equals(name)) {
-                    super.setSingleAttribute(alias, val.toString());
-                    logger.debugf(" -> %s=%s", alias, val);
+                    super.setSingleAttribute(alias, str);
+                    logger.debugf(" -> %s=%s", alias, str);
                 }
                 String columnAlias = ATTR_COLUMNS.get(name);
                 if (columnAlias != null &&
                         !columnAlias.equals(name) &&
                         !columnAlias.equals(alias)) {
-                    super.setSingleAttribute(columnAlias, val.toString());
-                    logger.debugf(" -> %s=%s", columnAlias, val);
+                    super.setSingleAttribute(columnAlias, str);
+                    logger.debugf(" -> %s=%s", columnAlias, str);
                 }
             }
         });
@@ -279,7 +305,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     public Long getCreatedTimestamp() {
         java.time.LocalDateTime ts = user.getCreatedAt();
         if (ts != null) {
-            return ts.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+            return ts.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
         }
         return super.getCreatedTimestamp();
     }
@@ -289,7 +315,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         java.time.LocalDateTime ldt = null;
         if (timestamp != null) {
             java.time.Instant i = java.time.Instant.ofEpochMilli(timestamp);
-            ldt = java.time.LocalDateTime.ofInstant(i, java.time.ZoneId.systemDefault());
+            ldt = java.time.LocalDateTime.ofInstant(i, java.time.ZoneOffset.UTC);
         }
         updateAttribute("createdAt", ldt);
         super.setCreatedTimestamp(timestamp);
@@ -306,7 +332,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         java.time.LocalDateTime ldt = (java.time.LocalDateTime) val;
         Long ts = null;
         if (ldt != null) {
-            ts = ldt.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+            ts = ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
         }
         setCreatedTimestamp(ts);
     }
@@ -327,7 +353,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
             java.time.LocalDateTime ldt = (java.time.LocalDateTime) val;
             Long ts = null;
             if (ldt != null) {
-                ts = ldt.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+                ts = ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
             }
             setCreatedTimestamp(ts);
         } else {
@@ -346,7 +372,16 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         HashMap<String, List<String>> attrs = new HashMap<>(super.getAttributes());
         ATTR_GETTERS.forEach((key, fn) -> {
             Object val = fn.apply(user);
-            if (val != null) attrs.put(key, List.of(val.toString()));
+            if (val != null) {
+                String str;
+                if (val instanceof java.time.LocalDateTime ldt && DATETIME_ATTRS.contains(key)) {
+                    long ms = ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
+                    str = String.valueOf(ms);
+                } else {
+                    str = val.toString();
+                }
+                attrs.put(key, List.of(str));
+            }
         });
         return attrs;
     }
