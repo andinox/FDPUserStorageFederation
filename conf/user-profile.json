@@ -8,110 +8,32 @@
     },
     {
       "name": "firstName",
-      "displayName": "First name",
-      "group": "ADH6"
+      "displayName": "First name"
     },
     {
       "name": "lastName",
-      "displayName": "Last name",
-      "group": "ADH6"
+      "displayName": "Last name"
     },
     {
       "name": "prenom",
-      "displayName": "First name",
-      "group": "ADH6"
+      "displayName": "First name"
     },
     {
       "name": "nom",
-      "displayName": "Last name",
-      "group": "ADH6"
+      "displayName": "Last name"
     },
     {
       "name": "ldapLogin",
-      "displayName": "LDAP login",
-      "group": "ADH6"
-    },
-    {
-      "name": "general",
-      "displayName": "Comments",
-      "group": "ADH6"
-    },
-    {
-      "name": "departureDate",
-      "displayName": "Departure date",
-      "group": "ADH6"
-    },
-    {
-      "name": "modeAssociation",
-      "displayName": "Mode association",
-      "group": "ADH6"
-    },
-    {
-      "name": "accessToken",
-      "displayName": "Access token",
-      "group": "ADH6"
-    },
-    {
-      "name": "subnet",
-      "displayName": "Subnet",
-      "group": "ADH6"
-    },
-    {
-      "name": "ip",
-      "displayName": "IP address",
-      "group": "ADH6"
-    },
-    {
-      "name": "chambreId",
-      "displayName": "Chambre ID",
-      "group": "ADH6"
+      "displayName": "LDAP login"
     },
     {
       "name": "createdAt",
-      "displayName": "Created at (DB)",
-      "group": "ADH6"
-    },
-    {
-      "name": "updatedAt",
-      "displayName": "Updated at (DB)",
-      "group": "ADH6"
-    },
-    {
-      "name": "edminet",
-      "displayName": "Edminet",
-      "group": "ADH6"
+      "displayName": "Created at (DB)"
     },
     {
       "name": "isNaina",
-      "displayName": "Is Naina",
-      "group": "ADH6"
-    },
-    {
-      "name": "mailingList",
-      "displayName": "Mailing list",
-      "group": "ADH6"
-    },
-    {
-      "name": "mailMembership",
-      "displayName": "Mail membership",
-      "group": "ADH6"
-    },
-    {
-      "name": "dateSignedHosting",
-      "displayName": "Date signed hosting",
-      "group": "ADH6"
-    },
-    {
-      "name": "dateSignedAdhesion",
-      "displayName": "Date signed adhesion",
-      "group": "ADH6"
+      "displayName": "Is Naina"
     }
   ],
-  "groups": [
-    {
-      "name": "ADH6",
-      "displayHeader": "ADH6 Attributes",
-      "displayDescription": "Attributes from the ADH6 database"
-    }
-  ]
+  "groups": []
 }

@@ -39,12 +39,10 @@ public class FdpSQLUserStorageProvider implements
 
     private static final Logger logger = Logger.getLogger(FdpSQLUserStorageProvider.class);
 
+    // Only retrieve columns we care about from the external DB
     private static final String SELECT_FIELDS = String.join(", ",
-            "id", "nom", "prenom", "mail", "login", "password", "date_de_depart",
-            "commentaires", "mode_association", "access_token", "subnet", "ip",
-            "chambre_id", "created_at", "updated_at", "edminet", "is_naina",
-            "mailinglist", "mail_membership", "ldap_login",
-            "datesignedhosting", "datesignedadhesion");
+            "id", "nom", "prenom", "mail", "login", "password",
+            "created_at", "is_naina", "ldap_login");
 
     protected KeycloakSession session;
     protected DataSource dataSource;
