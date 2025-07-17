@@ -60,12 +60,39 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
 
     private static final Set<String> DATETIME_ATTRIBUTES = Set.of("createdAt");
 
+    private static final Map<String, Function<String, Object>> VALUE_PARSERS = Map.of(
+            "createdAt", ExternalUserAdapter::parseDateTime,
+            "isNaina", (String v) -> Byte.valueOf(v)
+    );
+
     private static <T> T get(ExternalUser u, Function<ExternalUser, T> fn) {
         return fn.apply(u);
     }
 
     private static void set(ExternalUser u, BiConsumer<ExternalUser, Object> fn, Object v) {
         fn.accept(u, v);
+    }
+
+    private static java.time.LocalDateTime parseDateTime(String value) {
+        if (value.matches("-?\\d+")) {
+            long ms = Long.parseLong(value);
+            return java.time.LocalDateTime.ofInstant(
+                    java.time.Instant.ofEpochMilli(ms),
+                    java.time.ZoneOffset.UTC);
+        }
+        String v = value.replace(' ', 'T');
+        java.time.format.DateTimeFormatter[] fmts = {
+                java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"),
+                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        };
+        for (java.time.format.DateTimeFormatter fmt : fmts) {
+            try {
+                return java.time.LocalDateTime.parse(v, fmt);
+            } catch (java.time.format.DateTimeParseException ignore) {
+            }
+        }
+        throw new java.time.format.DateTimeParseException("Unparseable date", value, 0);
     }
 
     /**
@@ -83,36 +110,41 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
-        try {
-            return switch (name) {
-                case "createdAt" -> {
-                    if (value.matches("-?\\d+")) {
-                        long ms = Long.parseLong(value);
-                        yield java.time.LocalDateTime.ofInstant(
-                                java.time.Instant.ofEpochMilli(ms),
-                                java.time.ZoneOffset.UTC);
-                    }
-                    String v = value.replace(' ', 'T');
-                    java.time.format.DateTimeFormatter[] fmts = {
-                        java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-                        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"),
-                        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                    };
-                    for (java.time.format.DateTimeFormatter fmt : fmts) {
-                        try {
-                            java.time.LocalDateTime t = java.time.LocalDateTime.parse(v, fmt);
-                            yield t;
-                        } catch (java.time.format.DateTimeParseException ignore) {
-                        }
-                    }
-                    throw new java.time.format.DateTimeParseException("Unparseable date", value, 0);
-                }
-                case "isNaina" -> Byte.valueOf(value);
-                default -> value;
-            };
-        } catch (RuntimeException e) {
-            logger.warnf("Failed to parse value for %s: %s", name, value);
+        Function<String, Object> parser = VALUE_PARSERS.get(name);
+        if (parser != null) {
+            try {
+                return parser.apply(value);
+            } catch (RuntimeException e) {
+                logger.warnf("Failed to parse value for %s: %s", name, value);
+                return null;
+            }
+        }
+        return value;
+    }
+
+    private static String toAttributeString(String name, Object value) {
+        if (value == null) {
             return null;
+        }
+        if (value instanceof java.time.LocalDateTime ldt && DATETIME_ATTRIBUTES.contains(name)) {
+            long ms = ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
+            return String.valueOf(ms);
+        }
+        return value.toString();
+    }
+
+    private void setAttributeWithAliases(String name, String value) {
+        super.setSingleAttribute(name, value);
+        logger.debugf(" -> %s=%s", name, value);
+        String alias = camelToSnake(name);
+        if (!alias.equals(name)) {
+            super.setSingleAttribute(alias, value);
+            logger.debugf(" -> %s=%s", alias, value);
+        }
+        String columnAlias = ATTRIBUTE_COLUMNS.get(name);
+        if (columnAlias != null && !columnAlias.equals(name) && !columnAlias.equals(alias)) {
+            super.setSingleAttribute(columnAlias, value);
+            logger.debugf(" -> %s=%s", columnAlias, value);
         }
     }
 
@@ -147,24 +179,8 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         if (setter != null && column != null) {
             set(user, setter, value);
             updateColumn(column, value);
-            String str;
-            if (value instanceof java.time.LocalDateTime ldt && DATETIME_ATTRIBUTES.contains(name)) {
-                long ms = ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
-                str = String.valueOf(ms);
-            } else {
-                str = value == null ? null : value.toString();
-            }
-            super.setSingleAttribute(name, str);
-            logger.debugf(" -> %s=%s", name, str);
-            String alias = camelToSnake(name);
-            if (!alias.equals(name)) {
-                super.setSingleAttribute(alias, str);
-                logger.debugf(" -> %s=%s", alias, str);
-            }
-            if (!column.equals(name) && !column.equals(alias)) {
-                super.setSingleAttribute(column, str);
-                logger.debugf(" -> %s=%s", column, str);
-            }
+            String str = toAttributeString(name, value);
+            setAttributeWithAliases(name, str);
         } else {
             super.setSingleAttribute(name, value == null ? null : value.toString());
         }
@@ -196,43 +212,14 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
             Object val = fn.apply(user);
             if (val != null) {
                 logger.debugf("addDefaults %s=%s", name, val);
-                String str;
+                String str = toAttributeString(name, val);
                 switch (name) {
-                    case "email" -> {
-                        setEmail((String) val);
-                        str = (String) val;
-                    }
-                    case "firstName" -> {
-                        setFirstName((String) val);
-                        str = (String) val;
-                    }
-                    case "lastName" -> {
-                        setLastName((String) val);
-                        str = (String) val;
-                    }
-                    case "createdAt" -> {
-                        long ms = ((java.time.LocalDateTime) val)
-                                .atZone(java.time.ZoneOffset.UTC)
-                                .toInstant().toEpochMilli();
-                        setCreatedTimestamp(ms);
-                        str = String.valueOf(ms);
-                    }
-                    default -> str = val.toString();
+                    case "email" -> setEmail((String) val);
+                    case "firstName" -> setFirstName((String) val);
+                    case "lastName" -> setLastName((String) val);
+                    case "createdAt" -> setCreatedTimestamp(Long.parseLong(str));
                 }
-                super.setSingleAttribute(name, str);
-                logger.debugf(" -> %s=%s", name, str);
-                String alias = camelToSnake(name);
-                if (!alias.equals(name)) {
-                    super.setSingleAttribute(alias, str);
-                    logger.debugf(" -> %s=%s", alias, str);
-                }
-                String columnAlias = ATTRIBUTE_COLUMNS.get(name);
-                if (columnAlias != null &&
-                        !columnAlias.equals(name) &&
-                        !columnAlias.equals(alias)) {
-                    super.setSingleAttribute(columnAlias, str);
-                    logger.debugf(" -> %s=%s", columnAlias, str);
-                }
+                setAttributeWithAliases(name, str);
             }
         });
     }
@@ -350,13 +337,7 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         ATTRIBUTE_GETTERS.forEach((key, fn) -> {
             Object val = fn.apply(user);
             if (val != null) {
-                String str;
-                if (val instanceof java.time.LocalDateTime ldt && DATETIME_ATTRIBUTES.contains(key)) {
-                    long ms = ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli();
-                    str = String.valueOf(ms);
-                } else {
-                    str = val.toString();
-                }
+                String str = toAttributeString(key, val);
                 attrs.put(key, List.of(str));
             }
         });
