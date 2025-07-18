@@ -25,8 +25,12 @@ mvn package
    ```
 
    This brings up Keycloak along with MariaDB and PostgreSQL using the
-   configuration from `docker-compose.yml`. Keycloak will be available at
-   `http://localhost:8080`.
+    configuration from `docker-compose.yml`. Keycloak will be available at
+    `http://localhost:8080`.
+
+    The initial administrator account can be customised using the
+    environment variables `KC_BOOTSTRAP_ADMIN_USERNAME` and
+    `KC_BOOTSTRAP_ADMIN_PASSWORD` defined in the compose files.
 
 ## Database schema
 

@@ -3,8 +3,8 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.2.5
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       QUARKUS_DATASOURCE_FEDERATION_JDBC_URL: jdbc:mariadb://mariadb:3306/adh6_prod
       QUARKUS_DATASOURCE_FEDERATION_USERNAME: keycloak
       QUARKUS_DATASOURCE_FEDERATION_PASSWORD: password
