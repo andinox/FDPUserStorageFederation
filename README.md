@@ -10,6 +10,44 @@ that database.
 mvn package
 ```
 
+## Running with Docker Compose
+
+1. Build the project so the jar is available for Keycloak:
+
+   ```
+   mvn package
+   ```
+
+2. Start the environment:
+
+   ```
+   docker compose up
+   ```
+
+   This brings up Keycloak along with MariaDB and PostgreSQL using the
+   configuration from `docker-compose.yml`. Keycloak will be available at
+   `http://localhost:8080`.
+
+## Database schema
+
+The `sql/` directory contains the scripts used to initialize the MariaDB
+database. `cas_schema.sql` creates a table called `adherents` with all the
+columns expected by the provider and `cas_data.sql` inserts two example rows.
+These files are mounted into the MariaDB container via
+`./sql:/docker-entrypoint-initdb.d` so they run automatically on the first
+startup.
+
+If you need to reset the database simply remove the `mariadb_data` volume and
+restart the compose environment.
+
+## Running tests
+
+Execute the unit tests using Maven:
+
+```
+mvn test
+```
+
 ## Configuration
 
 The provider expects a Keycloak configuration file `conf/user-profile.json` to be mounted so
