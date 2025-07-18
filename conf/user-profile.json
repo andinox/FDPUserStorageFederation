@@ -1,0 +1,39 @@
+{
+  "attributes": [
+    {
+      "name": "username"
+    },
+    {
+      "name": "email"
+    },
+    {
+      "name": "firstName",
+      "displayName": "First name"
+    },
+    {
+      "name": "lastName",
+      "displayName": "Last name"
+    },
+    {
+      "name": "prenom",
+      "displayName": "First name"
+    },
+    {
+      "name": "nom",
+      "displayName": "Last name"
+    },
+    {
+      "name": "ldapLogin",
+      "displayName": "LDAP login"
+    },
+    {
+      "name": "createdAt",
+      "displayName": "Created at (DB)"
+    },
+    {
+      "name": "isNaina",
+      "displayName": "Is Naina"
+    }
+  ],
+  "groups": []
+}
