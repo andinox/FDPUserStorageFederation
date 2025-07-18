@@ -22,6 +22,10 @@ import org.keycloak.storage.adapter.AbstractUserAdapterFederatedStorage;
 
 /**
  * Adapter that exposes an {@link ExternalUser} to Keycloak.
+ *
+ * <p>Mapped attributes are stored under multiple aliases: the Java bean name,
+ * a snake_case version and the actual column name. Updates to any alias keep
+ * the underlying entity and all other aliases in sync.</p>
  */
 public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     private final ExternalUser user;
