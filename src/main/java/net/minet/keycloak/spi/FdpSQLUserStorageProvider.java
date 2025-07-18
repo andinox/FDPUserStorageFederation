@@ -4,8 +4,8 @@ import javax.sql.DataSource;
 import java.sql.*;
 import net.minet.keycloak.hash.Md4Util;
 import net.minet.keycloak.spi.entity.ExternalUser;
-import net.minet.keycloak.spi.ExternalUserMapper;
 import net.minet.keycloak.spi.ExternalUserAdapter;
+import net.minet.keycloak.spi.dao.ExternalUserDao;
 import org.jboss.logging.Logger;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
@@ -43,22 +43,8 @@ public class FdpSQLUserStorageProvider implements
 
     private static final Logger logger = Logger.getLogger(FdpSQLUserStorageProvider.class);
 
-    // Only retrieve columns we care about from the external DB
-    private static final String SELECT_FIELDS = String.join(", ",
-            "id", "nom", "prenom", "mail", "login",
-            "created_at", "is_naina", "ldap_login");
 
-    private static final String SELECT_BY_ID =
-            "SELECT " + SELECT_FIELDS + " FROM adherents WHERE id = ?";
-    private static final String SELECT_BY_USERNAME =
-            "SELECT " + SELECT_FIELDS + " FROM adherents WHERE login = ?";
-    private static final String SELECT_BY_EMAIL =
-            "SELECT " + SELECT_FIELDS + " FROM adherents WHERE mail = ?";
-
-    @FunctionalInterface
-    private interface StatementConfigurer {
-        void accept(PreparedStatement ps) throws SQLException;
-    }
+    private final ExternalUserDao userDao;
 
     protected KeycloakSession session;
     protected DataSource dataSource;
@@ -68,6 +54,7 @@ public class FdpSQLUserStorageProvider implements
         this.session = session;
         this.model = model;
         this.dataSource = dataSource;
+        this.userDao = new ExternalUserDao(dataSource);
     }
 
     protected UserModel createAdapter(RealmModel realm, ExternalUser user) {
@@ -88,21 +75,6 @@ public class FdpSQLUserStorageProvider implements
         // nothing to close
     }
 
-    private UserModel findUser(RealmModel realm, String query,
-                               StatementConfigurer config, String logInfo) {
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement(query)) {
-            config.accept(ps);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return createAdapter(realm, ExternalUserMapper.map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            logger.warn("Failed to get user " + logInfo + ": " + e.getMessage());
-        }
-        return null;
-    }
 
     @Override
     public UserModel getUserById(RealmModel realm, String id) {
@@ -119,19 +91,20 @@ public class FdpSQLUserStorageProvider implements
             return null;
         }
 
-        return findUser(realm, SELECT_BY_ID, ps -> ps.setInt(1, userId), "by id " + id);
+        ExternalUser user = userDao.findById(userId);
+        return user == null ? null : createAdapter(realm, user);
     }
 
     @Override
     public UserModel getUserByUsername(RealmModel realm, String username) {
-        return findUser(realm, SELECT_BY_USERNAME, ps -> ps.setString(1, username),
-                "by username " + username);
+        ExternalUser user = userDao.findByUsername(username);
+        return user == null ? null : createAdapter(realm, user);
     }
 
     @Override
     public UserModel getUserByEmail(RealmModel realm, String email) {
-        return findUser(realm, SELECT_BY_EMAIL, ps -> ps.setString(1, email),
-                "by email " + email);
+        ExternalUser user = userDao.findByEmail(email);
+        return user == null ? null : createAdapter(realm, user);
     }
 
     @Override
@@ -223,55 +196,20 @@ public class FdpSQLUserStorageProvider implements
     }
 
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT " + SELECT_FIELDS + " FROM adherents LIMIT ? OFFSET ?")) {
-            ps.setInt(1, max);
-            ps.setInt(2, first);
-            try (ResultSet rs = ps.executeQuery()) {
-                java.util.List<UserModel> list = new java.util.ArrayList<>();
-                while (rs.next()) {
-                    list.add(createAdapter(realm, ExternalUserMapper.map(rs)));
-                }
-                return list.stream();
-            }
-        } catch (SQLException e) {
-            return Stream.empty();
-        }
+        return userDao.getUsersStream(first, max)
+                .map(u -> createAdapter(realm, u));
     }
 
     @Override
     public int getUsersCount(RealmModel realm) {
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM adherents")) {
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            logger.warn("Failed to count users: " + e.getMessage());
-        }
-        return 0;
+        return userDao.getUsersCount();
     }
 
     @Override
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
-        String pattern = "%" + search.toLowerCase() + "%";
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT " + SELECT_FIELDS + " FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?")) {
-            ps.setString(1, pattern);
-            ps.setInt(2, max);
-            ps.setInt(3, first);
-            try (ResultSet rs = ps.executeQuery()) {
-                java.util.List<UserModel> list = new java.util.ArrayList<>();
-                while (rs.next()) {
-                    list.add(createAdapter(realm, ExternalUserMapper.map(rs)));
-                }
-                return list.stream();
-            }
-        } catch (SQLException e) {
-            return Stream.empty();
-        }
+        return userDao.searchForUserStream(search, first == null ? 0 : first,
+                max == null ? Integer.MAX_VALUE : max)
+                .map(u -> createAdapter(realm, u));
     }
 
     @Override
