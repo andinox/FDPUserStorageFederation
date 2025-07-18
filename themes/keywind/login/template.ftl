@@ -19,9 +19,7 @@
   showAnotherWayIfPresent=true
 >
   <#assign cardHeader>
-    <@logo.kw>
-      ${kcSanitize(msg("loginTitleHtml", (realm.displayNameHtml!"")))?no_esc}
-    </@logo.kw>
+    <@logo.kw />
     <#if !(auth?has_content && auth.showUsername() && !auth.showResetCredentials())>
       <@heading.kw>
         <#nested "header">
