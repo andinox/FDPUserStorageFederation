@@ -9,14 +9,15 @@ import java.util.HexFormat;
 
 /** Utility for computing MD4 digests as hexadecimal strings. */
 public final class Md4Util {
-    
+
+    /**
+     * Bloc statique qui vérifie si le fournisseur BouncyCastle est déjà enregistré.
+     * Si ce n'est pas le cas, il l'ajoute au registre des fournisseurs de sécurité.
+     */
     static {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-    }
-
-    private Md4Util() {
     }
 
     /**
