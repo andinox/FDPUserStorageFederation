@@ -40,7 +40,6 @@ public final class ExternalUserMapper {
             new ColumnMapping("prenom", (u, rs) -> u.setFirstName(rs.getString("prenom"))),
             new ColumnMapping("mail", (u, rs) -> u.setEmail(rs.getString("mail"))),
             new ColumnMapping("login", (u, rs) -> u.setUsername(rs.getString("login"))),
-            new ColumnMapping("password", (u, rs) -> u.setPassword(rs.getString("password"))),
             new ColumnMapping("created_at", (u, rs) -> {
                 Timestamp ts = rs.getTimestamp("created_at");
                 if (ts != null) u.setCreatedAt(ts.toLocalDateTime());
