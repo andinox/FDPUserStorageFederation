@@ -54,8 +54,8 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
             Map.entry("firstName", ExternalUser::getFirstName),
             Map.entry("lastName", ExternalUser::getLastName),
             Map.entry("ldapLogin", ExternalUser::getLdapLogin),
-            Map.entry("createdAt", u -> u.getCreatedAt()),
-            Map.entry("isNaina", u -> u.getIsNaina())
+            Map.entry("createdAt", ExternalUser::getCreatedAt),
+            Map.entry("isNaina", ExternalUser::getIsNaina)
     );
 
     private static final Set<String> DATETIME_ATTRIBUTES = Set.of("createdAt");
