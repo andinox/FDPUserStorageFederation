@@ -45,7 +45,7 @@ public class FdpSQLUserStorageProvider implements
 
     // Only retrieve columns we care about from the external DB
     private static final String SELECT_FIELDS = String.join(", ",
-            "id", "nom", "prenom", "mail", "login", "password",
+            "id", "nom", "prenom", "mail", "login",
             "created_at", "is_naina", "ldap_login");
 
     private static final String SELECT_BY_ID =
