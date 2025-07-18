@@ -44,6 +44,18 @@ public class FdpSQLUserStorageProvider implements
             "id", "nom", "prenom", "mail", "login", "password",
             "created_at", "is_naina", "ldap_login");
 
+    private static final String SELECT_BY_ID =
+            "SELECT " + SELECT_FIELDS + " FROM adherents WHERE id = ?";
+    private static final String SELECT_BY_USERNAME =
+            "SELECT " + SELECT_FIELDS + " FROM adherents WHERE login = ?";
+    private static final String SELECT_BY_EMAIL =
+            "SELECT " + SELECT_FIELDS + " FROM adherents WHERE mail = ?";
+
+    @FunctionalInterface
+    private interface StatementConfigurer {
+        void accept(PreparedStatement ps) throws SQLException;
+    }
+
     protected KeycloakSession session;
     protected DataSource dataSource;
     protected ComponentModel model;
@@ -72,6 +84,22 @@ public class FdpSQLUserStorageProvider implements
         // nothing to close
     }
 
+    private UserModel findUser(RealmModel realm, String query,
+                               StatementConfigurer config, String logInfo) {
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement(query)) {
+            config.accept(ps);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return createAdapter(realm, ExternalUserMapper.map(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.warn("Failed to get user " + logInfo + ": " + e.getMessage());
+        }
+        return null;
+    }
+
     @Override
     public UserModel getUserById(RealmModel realm, String id) {
         Integer userId = null;
@@ -87,50 +115,19 @@ public class FdpSQLUserStorageProvider implements
             return null;
         }
 
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT " + SELECT_FIELDS + " FROM adherents WHERE id = ?")) {
-            ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return createAdapter(realm, ExternalUserMapper.map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            logger.warn("Failed to get user by id " + id + ": " + e.getMessage());
-        }
-        return null;
+        return findUser(realm, SELECT_BY_ID, ps -> ps.setInt(1, userId), "by id " + id);
     }
 
     @Override
     public UserModel getUserByUsername(RealmModel realm, String username) {
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT " + SELECT_FIELDS + " FROM adherents WHERE login = ?")) {
-            ps.setString(1, username);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return createAdapter(realm, ExternalUserMapper.map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            logger.warn("Failed to get user by username " + username + ": " + e.getMessage());
-        }
-        return null;
+        return findUser(realm, SELECT_BY_USERNAME, ps -> ps.setString(1, username),
+                "by username " + username);
     }
 
     @Override
     public UserModel getUserByEmail(RealmModel realm, String email) {
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT " + SELECT_FIELDS + " FROM adherents WHERE mail = ?")) {
-            ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return createAdapter(realm, ExternalUserMapper.map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            logger.warn("Failed to get user by email " + email + ": " + e.getMessage());
-        }
-        return null;
+        return findUser(realm, SELECT_BY_EMAIL, ps -> ps.setString(1, email),
+                "by email " + email);
     }
 
     @Override
