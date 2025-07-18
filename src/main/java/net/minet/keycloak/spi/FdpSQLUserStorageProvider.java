@@ -26,8 +26,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * User storage provider backed by an external SQL database. It exposes users
- * to Keycloak and supports credential validation and updates.
+ * User storage provider backed by an external SQL database.
+ *
+ * <p>Users are loaded via JDBC and wrapped in {@link ExternalUserAdapter} so
+ * that Keycloak can query and update them. Credential operations are handled
+ * through {@link #isValid(RealmModel, UserModel, CredentialInput)} and
+ * {@link #updateCredential(RealmModel, UserModel, CredentialInput)}.</p>
  */
 public class FdpSQLUserStorageProvider implements
         UserStorageProvider,
