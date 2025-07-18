@@ -128,4 +128,87 @@ public class FdpSQLUserStorageProviderTest {
         LocalDateTime dt2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(1714694400000L), ZoneOffset.UTC);
         assertEquals(dt2, ext.getCreatedAt());
     }
+
+    @Test
+    public void testRemoveUserDeletesRow() throws Exception {
+        UserModel user = provider.getUserById(realm, "comp:2");
+        assertNotNull(user);
+        assertTrue(provider.removeUser(realm, user));
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM adherents WHERE id=?")) {
+            ps.setInt(1, 2);
+            try (var rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(0, rs.getInt(1));
+            }
+        }
+    }
+
+    @Test
+    public void testRemoveUserInvalidId() throws Exception {
+        UserModel user = Mockito.mock(UserModel.class);
+        Mockito.when(user.getId()).thenReturn("comp:abc");
+        assertFalse(provider.removeUser(realm, user));
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM adherents")) {
+            try (var rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(2, rs.getInt(1));
+            }
+        }
+    }
+
+    @Test
+    public void testRemoveUserSqlError() throws Exception {
+        try (Connection c = dataSource.getConnection()) {
+            c.createStatement().execute("DROP TABLE adherents");
+        }
+        UserModel user = Mockito.mock(UserModel.class);
+        Mockito.when(user.getId()).thenReturn("comp:1");
+        assertFalse(provider.removeUser(realm, user));
+    }
+
+    @Test
+    public void testUpdateCredential() throws Exception {
+        UserModel user = provider.getUserById(realm, "comp:1");
+        assertNotNull(user);
+        CredentialInput input = new CredentialInput() {
+            @Override public String getType() { return CredentialModel.PASSWORD; }
+            @Override public String getChallengeResponse() { return "newpass"; }
+        };
+        assertTrue(provider.updateCredential(realm, user, input));
+        try (Connection c = dataSource.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT password FROM adherents WHERE id=?")) {
+            ps.setInt(1, 1);
+            try (var rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(Md4Util.md4Hex("newpass"), rs.getString(1));
+            }
+        }
+    }
+
+    @Test
+    public void testUpdateCredentialInvalidId() throws Exception {
+        UserModel user = Mockito.mock(UserModel.class);
+        Mockito.when(user.getId()).thenReturn("comp:abc");
+        CredentialInput input = new CredentialInput() {
+            @Override public String getType() { return CredentialModel.PASSWORD; }
+            @Override public String getChallengeResponse() { return "newpass"; }
+        };
+        assertFalse(provider.updateCredential(realm, user, input));
+    }
+
+    @Test
+    public void testUpdateCredentialSqlError() throws Exception {
+        try (Connection c = dataSource.getConnection()) {
+            c.createStatement().execute("DROP TABLE adherents");
+        }
+        UserModel user = Mockito.mock(UserModel.class);
+        Mockito.when(user.getId()).thenReturn("comp:1");
+        CredentialInput input = new CredentialInput() {
+            @Override public String getType() { return CredentialModel.PASSWORD; }
+            @Override public String getChallengeResponse() { return "newpass"; }
+        };
+        assertFalse(provider.updateCredential(realm, user, input));
+    }
 }
