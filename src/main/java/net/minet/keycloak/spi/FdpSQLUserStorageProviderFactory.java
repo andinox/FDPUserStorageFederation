@@ -17,6 +17,9 @@ public class FdpSQLUserStorageProviderFactory implements UserStorageProviderFact
     private DataSource dataSource;
 
     @Override
+    /**
+     * Initialise la datasource à partir de la configuration fournie par Keycloak.
+     */
     public void init(Config.Scope config) {
         try {
             MariaDbDataSource ds = new MariaDbDataSource();
@@ -33,16 +36,25 @@ public class FdpSQLUserStorageProviderFactory implements UserStorageProviderFact
     }
 
     @Override
+    /**
+     * Crée une nouvelle instance du provider utilisée pour traiter les requêtes de Keycloak.
+     */
     public FdpSQLUserStorageProvider create(KeycloakSession session, ComponentModel model) {
         return new FdpSQLUserStorageProvider(session, model, dataSource);
     }
 
     @Override
+    /**
+     * Identifiant utilisé par Keycloak pour référencer ce provider.
+     */
     public String getId() {
         return PROVIDER_NAME;
     }
 
     @Override
+    /**
+     * Appelée à l'arrêt. Aucun traitement spécifique n'est nécessaire.
+     */
     public void close() {
         // nothing to close
     }

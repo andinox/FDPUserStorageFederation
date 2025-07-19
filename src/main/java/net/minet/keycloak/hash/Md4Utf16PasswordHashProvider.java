@@ -20,6 +20,9 @@ public class Md4Utf16PasswordHashProvider implements PasswordHashProvider {
      *
      * @param defaultIterations Le nombre d'itérations par défaut pour le hachage.
      */
+    /**
+     * Constructeur appelé par la factory lors de l'initialisation de Keycloak.
+     */
     public Md4Utf16PasswordHashProvider(int defaultIterations) {
         this.defaultIterations = defaultIterations;
     }

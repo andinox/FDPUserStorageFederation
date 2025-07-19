@@ -20,6 +20,7 @@ public class Md4Utf16PasswordHashProviderFactory implements PasswordHashProvider
      */
     @Override
     public PasswordHashProvider create(KeycloakSession session) {
+        // Keycloak appelle cette méthode pour obtenir une instance du fournisseur de hachage.
         return new Md4Utf16PasswordHashProvider(1);
     }
 
@@ -30,6 +31,7 @@ public class Md4Utf16PasswordHashProviderFactory implements PasswordHashProvider
      */
     @Override
     public void init(Config.Scope config) {
+        // Aucune configuration n'est nécessaire pour ce provider de hachage.
     }
 
     /**
@@ -39,6 +41,7 @@ public class Md4Utf16PasswordHashProviderFactory implements PasswordHashProvider
      */
     @Override
     public void postInit(KeycloakSessionFactory factory) {
+        // Rien à faire après l'initialisation.
     }
 
     /**
@@ -46,6 +49,7 @@ public class Md4Utf16PasswordHashProviderFactory implements PasswordHashProvider
      */
     @Override
     public void close() {
+        // Aucun nettoyage spécifique n'est requis.
     }
 
     /**
