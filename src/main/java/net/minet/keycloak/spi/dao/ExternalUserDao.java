@@ -30,6 +30,9 @@ public class ExternalUserDao {
 
     private final DataSource dataSource;
 
+    /**
+     * DAO initialisé par le provider pour exécuter les requêtes SQL nécessaires à Keycloak.
+     */
     public ExternalUserDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -54,18 +57,30 @@ public class ExternalUserDao {
         return null;
     }
 
+    /**
+     * Recherche un utilisateur par identifiant pour Keycloak.
+     */
     public ExternalUser findById(int id) {
         return findUser(SELECT_BY_ID, ps -> ps.setInt(1, id));
     }
 
+    /**
+     * Récupération d'un utilisateur via son login.
+     */
     public ExternalUser findByUsername(String username) {
         return findUser(SELECT_BY_USERNAME, ps -> ps.setString(1, username));
     }
 
+    /**
+     * Recherche d'un utilisateur par adresse email.
+     */
     public ExternalUser findByEmail(String email) {
         return findUser(SELECT_BY_EMAIL, ps -> ps.setString(1, email));
     }
 
+    /**
+     * Liste paginée des utilisateurs pour les appels de Keycloak.
+     */
     public Stream<ExternalUser> getUsersStream(int first, int max) {
         String query = "SELECT " + SELECT_FIELDS + " FROM adherents LIMIT ? OFFSET ?";
         try (Connection c = dataSource.getConnection();
@@ -85,6 +100,9 @@ public class ExternalUserDao {
         }
     }
 
+    /**
+     * Retourne le nombre total d'utilisateurs dans la base externe.
+     */
     public int getUsersCount() {
         String query = "SELECT COUNT(*) FROM adherents";
         try (Connection c = dataSource.getConnection();
@@ -100,6 +118,9 @@ public class ExternalUserDao {
         return 0;
     }
 
+    /**
+     * Recherche textuelle d'utilisateurs utilisée par l'interface admin.
+     */
     public Stream<ExternalUser> searchForUserStream(String search, int first, int max) {
         String pattern = "%" + search.toLowerCase() + "%";
         String query = "SELECT " + SELECT_FIELDS + " FROM adherents WHERE lower(login) LIKE ? LIMIT ? OFFSET ?";

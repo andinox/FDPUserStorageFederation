@@ -109,6 +109,7 @@ public final class ExternalUserMapper {
      * @throws SQLException If an SQL error occurs.
      */
     public static ExternalUser map(ResultSet rs) throws SQLException {
+        // Keycloak utilise ce mapper pour convertir les résultats SQL en objets utilisateurs.
         ExternalUser user = new ExternalUser();
         Set<String> columns = availableColumns(rs);
         for (ColumnMapping m : MAPPINGS) {

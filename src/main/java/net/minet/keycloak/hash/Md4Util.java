@@ -21,8 +21,7 @@ public final class Md4Util {
     }
 
     /**
-     * Returns the MD4 hash of the given input encoded in UTF-16LE as a
-     * lower-case hexadecimal string.
+     * Calcule un hachage MD4 en UTF-16LE. Utilisé par Keycloak pour comparer les mots de passe d'anciens systèmes.
      */
     public static String md4Hex(String input) {
         try {

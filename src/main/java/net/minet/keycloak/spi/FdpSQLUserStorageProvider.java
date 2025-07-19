@@ -50,6 +50,10 @@ public class FdpSQLUserStorageProvider implements
     protected DataSource dataSource;
     protected ComponentModel model;
 
+    /**
+     * Instancié par Keycloak lors de l'initialisation du composant de federation.
+     * Les connexions JDBC et le DAO sont prêts à être utilisés pour toutes les opérations.
+     */
     public FdpSQLUserStorageProvider(KeycloakSession session, ComponentModel model, DataSource dataSource) {
         this.session = session;
         this.model = model;
@@ -57,13 +61,17 @@ public class FdpSQLUserStorageProvider implements
         this.userDao = new ExternalUserDao(dataSource);
     }
 
+    /**
+     * Crée l'adaptateur {@link ExternalUserAdapter} qui expose l'entité externe à Keycloak.
+     */
     protected UserModel createAdapter(RealmModel realm, ExternalUser user) {
         return new ExternalUserAdapter(session, realm, model, user, dataSource);
     }
 
 
     /**
-     * Extracts the numeric external identifier from the Keycloak-formatted id.
+     * Extrait l'identifiant numérique stocké dans l'ID Keycloak.
+     * Cette valeur sert à interroger la base externe.
      */
     private int extractUserId(String id) {
         String externalId = org.keycloak.storage.StorageId.externalId(id);
@@ -71,12 +79,18 @@ public class FdpSQLUserStorageProvider implements
     }
 
     @Override
+    /**
+     * Libère les ressources si nécessaire. Ici rien n'est requis mais la méthode est appelée par Keycloak lors de l'arrêt.
+     */
     public void close() {
         // nothing to close
     }
 
 
     @Override
+    /**
+     * Recherche un utilisateur par son identifiant interne fourni par Keycloak.
+     */
     public UserModel getUserById(RealmModel realm, String id) {
         Integer userId = null;
         try {
@@ -96,23 +110,35 @@ public class FdpSQLUserStorageProvider implements
     }
 
     @Override
+    /**
+     * Chargement d'un utilisateur par son nom. Utilisé notamment lors de la connexion.
+     */
     public UserModel getUserByUsername(RealmModel realm, String username) {
         ExternalUser user = userDao.findByUsername(username);
         return user == null ? null : createAdapter(realm, user);
     }
 
     @Override
+    /**
+     * Récupère un utilisateur via son email si celui-ci est unique.
+     */
     public UserModel getUserByEmail(RealmModel realm, String email) {
         ExternalUser user = userDao.findByEmail(email);
         return user == null ? null : createAdapter(realm, user);
     }
 
     @Override
+    /**
+     * Indique à Keycloak que ce provider gère uniquement des mots de passe.
+     */
     public boolean supportsCredentialType(String type) {
         return CredentialModel.PASSWORD.equals(type);
     }
 
     @Override
+    /**
+     * Enregistre un nouveau mot de passe fourni par Keycloak dans la base externe.
+     */
     public boolean updateCredential(RealmModel realm, UserModel user, CredentialInput input) {
         if (!supportsCredentialType(input.getType())) return false;
         try (Connection c = dataSource.getConnection();
@@ -132,16 +158,25 @@ public class FdpSQLUserStorageProvider implements
     }
 
     @Override
+    /**
+     * Aucun type d'identifiant ne peut être désactivé via ce provider.
+     */
     public Stream<String> getDisableableCredentialTypesStream(RealmModel realm, UserModel user) {
         return Stream.empty();
     }
 
     @Override
+    /**
+     * Keycloak appelle cette méthode pour savoir si l'utilisateur possède un mot de passe géré par ce provider.
+     */
     public boolean isConfiguredFor(RealmModel realm, UserModel user, String type) {
         return supportsCredentialType(type);
     }
 
     @Override
+    /**
+     * Vérifie la validité d'un mot de passe lors de l'authentification.
+     */
     public boolean isValid(RealmModel realm, UserModel user, CredentialInput input) {
         if (!supportsCredentialType(input.getType())) return false;
         try (Connection c = dataSource.getConnection();
@@ -165,6 +200,9 @@ public class FdpSQLUserStorageProvider implements
     }
 
     @Override
+    /**
+     * Ajoute un nouvel utilisateur minimal dans la base externe lorsque Keycloak en crée un.
+     */
     public UserModel addUser(RealmModel realm, String username) {
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement("INSERT INTO adherents (login) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
@@ -184,6 +222,9 @@ public class FdpSQLUserStorageProvider implements
     }
 
     @Override
+    /**
+     * Supprime l'utilisateur de la base externe quand Keycloak le désactive.
+     */
     public boolean removeUser(RealmModel realm, UserModel user) {
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement("DELETE FROM adherents WHERE id = ?")) {
@@ -195,17 +236,26 @@ public class FdpSQLUserStorageProvider implements
         }
     }
 
+    /**
+     * Retourne un flux paginé d'utilisateurs pour les besoins de l'interface d'administration Keycloak.
+     */
     public Stream<UserModel> getUsersStream(RealmModel realm, int first, int max) {
         return userDao.getUsersStream(first, max)
                 .map(u -> createAdapter(realm, u));
     }
 
     @Override
+    /**
+     * Nombre total d'utilisateurs présent dans la base externe.
+     */
     public int getUsersCount(RealmModel realm) {
         return userDao.getUsersCount();
     }
 
     @Override
+    /**
+     * Recherche d'utilisateurs depuis l'interface d'administration.
+     */
     public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer first, Integer max) {
         return userDao.searchForUserStream(search, first == null ? 0 : first,
                 max == null ? Integer.MAX_VALUE : max)
@@ -213,16 +263,25 @@ public class FdpSQLUserStorageProvider implements
     }
 
     @Override
+    /**
+     * Keycloak peut fournir un ensemble de critères, ici ils ne sont pas pris en compte.
+     */
     public Stream<UserModel> searchForUserStream(RealmModel realm, Map<String, String> params, Integer first, Integer max) {
         return getUsersStream(realm, first == null ? 0 : first, max == null ? Integer.MAX_VALUE : max);
     }
 
     @Override
+    /**
+     * La gestion des groupes n'est pas implémentée dans ce provider.
+     */
     public Stream<UserModel> getGroupMembersStream(RealmModel realm, GroupModel group, Integer first, Integer max) {
         return Stream.empty();
     }
 
     @Override
+    /**
+     * Recherche par attribut non prise en charge.
+     */
     public Stream<UserModel> searchForUserByUserAttributeStream(RealmModel realm, String attr, String value) {
         return Stream.empty();
     }

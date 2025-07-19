@@ -190,6 +190,10 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         }
     }
 
+    /**
+     * Constructeur utilisé par Keycloak pour créer l'adaptateur lors du chargement d'un utilisateur.
+     * Les informations de l'utilisateur externe sont conservées et exposées via l'API {@link UserModel}.
+     */
     public ExternalUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, ExternalUser user, DataSource dataSource) {
         super(session, realm, model);
         this.user = user;
@@ -198,6 +202,11 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
         addDefaults();
     }
 
+    /**
+     * Convertit un nom d'attribut en notation camelCase vers son équivalent snake_case.
+     * Keycloak n'appelle pas directement cette méthode mais elle sert à exposer
+     * les attributs sous plusieurs alias.
+     */
     private static String camelToSnake(String s) {
         return s.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
     }
@@ -229,47 +238,74 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     @Override
+    /**
+     * Retourne le nom d'utilisateur. Keycloak l'utilise pour l'identification et l'affichage.
+     */
     public String getUsername() {
         return get(user, ExternalUser::getUsername);
     }
 
     @Override
+    /**
+     * Met à jour le nom d'utilisateur côté base externe et dans Keycloak lorsqu'il change.
+     */
     public void setUsername(String username) {
         set(user, (u,v) -> u.setUsername((String)v), username);
         updateColumn("login", username);
     }
 
     @Override
+    /**
+     * Récupère l'adresse email depuis l'entité externe pour que Keycloak puisse l'exposer.
+     */
     public String getEmail() {
         return get(user, ExternalUser::getEmail);
     }
 
     @Override
+    /**
+     * Enregistre la nouvelle adresse email et synchronise la valeur en base.
+     */
     public void setEmail(String email) {
         updateAttribute("email", email);
     }
 
     @Override
+    /**
+     * Renvoie le prénom stocké en base externe. Keycloak l'affiche dans son interface.
+     */
     public String getFirstName() {
         return get(user, ExternalUser::getFirstName);
     }
 
     @Override
+    /**
+     * Met à jour le prénom de l'utilisateur dans la base externe et dans les attributs Keycloak.
+     */
     public void setFirstName(String firstName) {
         updateAttribute("firstName", firstName);
     }
 
     @Override
+    /**
+     * Renvoie le nom de famille afin que Keycloak puisse le présenter et le synchroniser.
+     */
     public String getLastName() {
         return get(user, ExternalUser::getLastName);
     }
 
     @Override
+    /**
+     * Modifie le nom de famille côté base et dans Keycloak.
+     */
     public void setLastName(String lastName) {
         updateAttribute("lastName", lastName);
     }
 
     @Override
+    /**
+     * Date de création de l'utilisateur convertie au format attendu par Keycloak.
+     */
     public Long getCreatedTimestamp() {
         java.time.LocalDateTime ts = user.getCreatedAt();
         if (ts != null) {
@@ -279,6 +315,9 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     @Override
+    /**
+     * Positionne la date de création depuis la valeur fournie par Keycloak et persiste la mise à jour.
+     */
     public void setCreatedTimestamp(Long timestamp) {
         java.time.LocalDateTime ldt = null;
         if (timestamp != null) {
@@ -290,10 +329,10 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     /**
-     * Convenience method to set the created timestamp from an ISO-8601
-     * {@link String} representation.
+     * Méthode utilitaire acceptant une date sous forme de chaîne.
+     * Keycloak peut envoyer des valeurs sous ce format via les APIs d'administration.
      *
-     * @param timestamp creation date as a string, e.g. "2025-01-02T10:00"
+     * @param timestamp date de création sous forme textuelle, par exemple "2025-01-02T10:00".
      */
     public void setCreatedTimestamp(String timestamp) {
         Object val = parseValue("createdAt", timestamp);
@@ -306,6 +345,9 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     @Override
+    /**
+     * Retourne un flux des valeurs d'attribut demandées. Keycloak l'utilise pour récupérer les attributs personnalisés.
+     */
     public java.util.stream.Stream<String> getAttributeStream(String name) {
         Map<String, List<String>> all = getAttributes();
         if (all.containsKey(name)) {
@@ -315,6 +357,9 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     @Override
+    /**
+     * Définit une valeur d'attribut en tenant compte des alias. Utilisé par Keycloak lors des mises à jour via son API.
+     */
     public void setSingleAttribute(String name, String value) {
         if ("createdAt".equals(name) || "created_at".equals(name)) {
             Object val = parseValue("createdAt", value);
@@ -331,11 +376,17 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     @Override
+    /**
+     * Supprime un attribut de l'utilisateur et de la base externe.
+     */
     public void removeAttribute(String name) {
         updateAttribute(name, null);
     }
 
     @Override
+    /**
+     * Fournit l'ensemble des attributs disponibles pour que Keycloak puisse les renvoyer via ses APIs.
+     */
     public Map<String, List<String>> getAttributes() {
         HashMap<String, List<String>> attrs = new HashMap<>(super.getAttributes());
         ATTRIBUTE_GETTERS.forEach((key, fn) -> {
@@ -349,11 +400,17 @@ public class ExternalUserAdapter extends AbstractUserAdapterFederatedStorage {
     }
 
     @Override
+    /**
+     * Dans ce module tous les emails sont considérés comme vérifiés.
+     */
     public boolean isEmailVerified() {
         return true;
     }
 
     @Override
+    /**
+     * L'état de vérification est fixé à vrai et ne peut être modifié par Keycloak.
+     */
     public void setEmailVerified(boolean verified) {
         // always verified, ignore
     }
